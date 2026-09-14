@@ -145,25 +145,6 @@ Student Analytics Dashboard
   Update Student Data
 ```
 
-## 🎯 Project Objective
-
-The objective of this project is to build a centralized, database-driven platform that transforms student academic, placement, and skill information into meaningful and easily accessible analytics.
-
-## 📚 Learning Outcomes
-
-This project provided practical experience in:
-
-* Full-stack web application development
-* Python and Flask
-* MySQL and SQL
-* Relational database concepts
-* Backend–database integration
-* Frontend–backend integration
-* Interactive data visualization
-* Authentication and session management
-* CRUD-based data management
-* Building real-world analytics dashboards
-
 ## 🔮 Future Enhancements
 
 * Machine Learning-based placement prediction
