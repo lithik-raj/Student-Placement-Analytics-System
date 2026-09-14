@@ -178,11 +178,4 @@ This project provided practical experience in:
 ## 👨‍💻 Author
 
 **Lithik Raj B G**
-
 **B.Tech – Artificial Intelligence and Data Science**
-
-GitHub: https://github.com/lithik-raj
-
-## ⭐ Project
-
-If you find this project interesting, consider giving the repository a ⭐.
