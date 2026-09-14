@@ -1,0 +1,569 @@
+```html
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Update Student | Placement Analytics</title>
+
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #050816;
+        color: #ffffff;
+        padding: 40px 20px;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 760px;
+        margin: auto;
+      }
+
+      .card {
+        background: rgba(10, 18, 40, 0.97);
+        border: 1px solid rgba(0, 229, 255, 0.35);
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow:
+          0 0 25px rgba(0, 229, 255, 0.12),
+          0 0 60px rgba(0, 229, 255, 0.05);
+      }
+
+      h1 {
+        text-align: center;
+        color: #00e5ff;
+        font-size: 30px;
+        margin-bottom: 10px;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #aeb8d0;
+        font-size: 14px;
+        margin-bottom: 10px;
+      }
+
+      .student-id {
+        text-align: center;
+        color: #00ff9d;
+        font-size: 15px;
+        font-weight: bold;
+        margin-bottom: 30px;
+      }
+
+      .section-title {
+        color: #00e5ff;
+        font-size: 18px;
+        font-weight: bold;
+        margin-top: 28px;
+        margin-bottom: 18px;
+        padding-bottom: 9px;
+        border-bottom: 1px solid rgba(0, 229, 255, 0.25);
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        color: #dce7ff;
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+
+      input,
+      select {
+        width: 100%;
+        padding: 13px 15px;
+        border: 1px solid rgba(0, 229, 255, 0.3);
+        border-radius: 10px;
+        background: #080f24;
+        color: #ffffff;
+        font-size: 15px;
+        outline: none;
+      }
+
+      input:focus,
+      select:focus {
+        border-color: #00e5ff;
+        box-shadow: 0 0 12px rgba(0, 229, 255, 0.25);
+      }
+
+      select option {
+        background: #080f24;
+        color: #ffffff;
+      }
+
+      .error {
+        padding: 13px;
+        margin-bottom: 20px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 50, 80, 0.4);
+        background: rgba(255, 50, 80, 0.12);
+        color: #ff6b81;
+        text-align: center;
+        font-size: 14px;
+      }
+
+      .note {
+        color: #8894b5;
+        font-size: 12px;
+        margin-top: 7px;
+      }
+
+      /* =====================================================
+         SKILLS
+         ===================================================== */
+
+      .skills-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .skill-row {
+        display: grid;
+        grid-template-columns: 35px 1fr 180px;
+        align-items: center;
+        gap: 12px;
+        padding: 14px;
+        border: 1px solid rgba(0, 229, 255, 0.2);
+        border-radius: 12px;
+        background: rgba(5, 15, 35, 0.85);
+        transition: 0.25s ease;
+      }
+
+      .skill-row:hover {
+        border-color: rgba(0, 229, 255, 0.55);
+        box-shadow: 0 0 14px rgba(0, 229, 255, 0.12);
+      }
+
+      .skill-checkbox {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        accent-color: #00e5ff;
+      }
+
+      .skill-name {
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: bold;
+        margin: 0;
+      }
+
+      .skill-proficiency {
+        width: 100%;
+        padding: 9px 10px;
+        font-size: 13px;
+      }
+
+      .skill-proficiency:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      .skills-empty {
+        padding: 18px;
+        text-align: center;
+        color: #8894b5;
+        border: 1px dashed rgba(0, 229, 255, 0.25);
+        border-radius: 12px;
+      }
+
+      .skills-summary {
+        margin-top: 12px;
+        color: #00ff9d;
+        font-size: 13px;
+        font-weight: bold;
+      }
+
+      /* =====================================================
+         BUTTONS
+         ===================================================== */
+
+      .buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 32px;
+      }
+
+      .save-button,
+      .cancel-button {
+        flex: 1;
+        padding: 14px 18px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: bold;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .save-button {
+        border: 1px solid #00e5ff;
+        background: rgba(0, 229, 255, 0.12);
+        color: #00e5ff;
+      }
+
+      .save-button:hover {
+        background: rgba(0, 229, 255, 0.22);
+        box-shadow: 0 0 18px rgba(0, 229, 255, 0.3);
+      }
+
+      .cancel-button {
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.05);
+        color: #ffffff;
+      }
+
+      .cancel-button:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      @media (max-width: 650px) {
+        .skill-row {
+          grid-template-columns: 30px 1fr;
+        }
+
+        .skill-proficiency {
+          grid-column: 2;
+        }
+      }
+
+      @media (max-width: 600px) {
+        body {
+          padding: 20px 12px;
+        }
+
+        .card {
+          padding: 25px 20px;
+        }
+
+        h1 {
+          font-size: 25px;
+        }
+
+        .buttons {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="card">
+        <h1>Update Student</h1>
+
+        <div class="subtitle">Admin Panel • Placement Analytics System</div>
+
+        <div class="student-id">Student ID: {{ student.student_id }}</div>
+
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST">
+          <!-- =================================================
+               STUDENT INFORMATION
+               ================================================= -->
+
+          <div class="section-title">Student Information</div>
+
+          <div class="form-group">
+            <label for="name">Student Name</label>
+
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value="{{ student.name or '' }}"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value="{{ student.email or '' }}"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="department">Department</label>
+
+            <input
+              type="text"
+              id="department"
+              name="department"
+              value="{{ student.department or '' }}"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="year">Year</label>
+
+            <input
+              type="number"
+              id="year"
+              name="year"
+              value="{{ student.year or '' }}"
+              min="1"
+              max="10"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="cgpa">CGPA</label>
+
+            <input
+              type="number"
+              id="cgpa"
+              name="cgpa"
+              value="{{ student.cgpa or '' }}"
+              min="0"
+              max="10"
+              step="0.01"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="gender">Gender</label>
+
+            <select id="gender" name="gender">
+              <option value="">Select Gender</option>
+
+              {% if student.gender == 'Male' %}
+              <option value="Male" selected>Male</option>
+              {% else %}
+              <option value="Male">Male</option>
+              {% endif %} {% if student.gender == 'Female' %}
+              <option value="Female" selected>Female</option>
+              {% else %}
+              <option value="Female">Female</option>
+              {% endif %} {% if student.gender == 'Other' %}
+              <option value="Other" selected>Other</option>
+              {% else %}
+              <option value="Other">Other</option>
+              {% endif %}
+            </select>
+          </div>
+
+          <!-- =================================================
+               PLACEMENT INFORMATION
+               ================================================= -->
+
+          <div class="section-title">Placement Information</div>
+
+          <div class="form-group">
+            <label for="placement_status"> Placement Status </label>
+
+            <select id="placement_status" name="placement_status">
+              {% if placement and placement.placement_status == 'PLACED' %}
+
+              <option value="PLACED" selected>PLACED</option>
+
+              <option value="NOT PLACED">NOT PLACED</option>
+
+              {% else %}
+
+              <option value="NOT PLACED" selected>NOT PLACED</option>
+
+              <option value="PLACED">PLACED</option>
+
+              {% endif %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="company_id"> Company </label>
+
+            <select id="company_id" name="company_id">
+              <option value="">Select Company</option>
+
+              {% for company in companies %} {% if placement and
+              placement.company_id == company.company_id %}
+
+              <option value="{{ company.company_id }}" selected>
+                {{ company.company_name }} - {{ company.package_lpa }} LPA
+              </option>
+
+              {% else %}
+
+              <option value="{{ company.company_id }}">
+                {{ company.company_name }} - {{ company.package_lpa }} LPA
+              </option>
+
+              {% endif %} {% endfor %}
+            </select>
+
+            <div class="note">Select a company when the student is placed.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="placement_date"> Placement Date </label>
+
+            <input
+              type="date"
+              id="placement_date"
+              name="placement_date"
+              value="{% if placement and placement.placement_date %}{{ placement.placement_date }}{% endif %}"
+            />
+          </div>
+
+          <!-- =================================================
+               SKILLS & PROFICIENCY
+               ================================================= -->
+
+          <div class="section-title">Skills & Readiness</div>
+
+          <div class="note" style="margin-bottom: 15px">
+            Select the skills this student has and choose the corresponding
+            proficiency level.
+          </div>
+
+          <div class="skills-container">
+            {% if all_skills %} {% for skill in all_skills %} {% set
+            existing_proficiency = current_skill_map.get(skill.skill_id) %}
+
+            <div class="skill-row">
+              <input
+                type="checkbox"
+                class="skill-checkbox"
+                name="skill_ids"
+                value="{{ skill.skill_id }}"
+                id="skill_{{ skill.skill_id }}"
+                {%
+                if
+                existing_proficiency
+                %}checked{%
+                endif
+                %}
+                onchange="toggleProficiency({{ skill.skill_id }})"
+              />
+
+              <label class="skill-name" for="skill_{{ skill.skill_id }}">
+                {{ skill.skill_name }}
+              </label>
+
+              <select
+                class="skill-proficiency"
+                name="proficiency_{{ skill.skill_id }}"
+                id="proficiency_{{ skill.skill_id }}"
+                {%
+                if
+                not
+                existing_proficiency
+                %}disabled{%
+                endif
+                %}
+              >
+                {% if existing_proficiency == 'Beginner' %}
+                <option value="Beginner" selected>Beginner</option>
+                {% else %}
+                <option value="Beginner">Beginner</option>
+                {% endif %} {% if existing_proficiency == 'Intermediate' %}
+                <option value="Intermediate" selected>Intermediate</option>
+                {% else %}
+                <option value="Intermediate">Intermediate</option>
+                {% endif %} {% if existing_proficiency == 'Advanced' %}
+                <option value="Advanced" selected>Advanced</option>
+                {% else %}
+                <option value="Advanced">Advanced</option>
+                {% endif %} {% if existing_proficiency == 'Expert' %}
+                <option value="Expert" selected>Expert</option>
+                {% else %}
+                <option value="Expert">Expert</option>
+                {% endif %}
+              </select>
+            </div>
+
+            {% endfor %} {% else %}
+
+            <div class="skills-empty">No skills available in the database.</div>
+
+            {% endif %}
+          </div>
+
+          <div class="skills-summary" id="skillsSummary">
+            Selected Skills: 0
+          </div>
+
+          <!-- =================================================
+               BUTTONS
+               ================================================= -->
+
+          <div class="buttons">
+            <button type="submit" class="save-button">Save Changes</button>
+
+            <a
+              href="{{ url_for('student_dashboard', student_id=student.student_id) }}"
+              class="cancel-button"
+            >
+              Cancel
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- =====================================================
+         SKILL JAVASCRIPT
+         ===================================================== -->
+
+    <script>
+      function toggleProficiency(skillId) {
+        const checkbox = document.getElementById("skill_" + skillId);
+
+        const proficiency = document.getElementById("proficiency_" + skillId);
+
+        if (checkbox.checked) {
+          proficiency.disabled = false;
+        } else {
+          proficiency.disabled = true;
+        }
+
+        updateSkillCount();
+      }
+
+      function updateSkillCount() {
+        const checkboxes = document.querySelectorAll(".skill-checkbox");
+
+        let count = 0;
+
+        checkboxes.forEach(function (checkbox) {
+          if (checkbox.checked) {
+            count++;
+          }
+        });
+
+        const summary = document.getElementById("skillsSummary");
+
+        if (summary) {
+          summary.textContent = "Selected Skills: " + count;
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        updateSkillCount();
+      });
+    </script>
+  </body>
+</html>
+```

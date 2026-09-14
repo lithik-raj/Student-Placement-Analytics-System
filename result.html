@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>{{ student.name }} | Student Analytics</title>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+
+    <style>
+      /* =========================================
+           ADMIN UPDATE BUTTON
+        ========================================= */
+
+      .student-admin-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-left: auto;
+      }
+
+      .update-student-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        padding: 11px 18px;
+
+        border: 1px solid rgba(0, 229, 255, 0.45);
+        border-radius: 10px;
+
+        background: rgba(0, 229, 255, 0.08);
+        color: #00e5ff;
+
+        text-decoration: none;
+
+        font-size: 14px;
+        font-weight: 600;
+
+        transition: all 0.25s ease;
+      }
+
+      .update-student-button:hover {
+        background: rgba(0, 229, 255, 0.16);
+
+        border-color: #00e5ff;
+
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.35);
+
+        transform: translateY(-1px);
+      }
+
+      .admin-label {
+        color: #00ff9d;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      /* =========================================
+           STATUS BOXES
+        ========================================= */
+
+      .status-box {
+        padding: 25px;
+
+        text-align: center;
+
+        border-radius: 14px;
+
+        background: rgba(0, 229, 255, 0.04);
+
+        border: 1px solid rgba(0, 229, 255, 0.15);
+      }
+
+      .status-number {
+        font-size: 32px;
+
+        font-weight: 700;
+
+        color: var(--cyan-bright);
+
+        margin-bottom: 8px;
+      }
+
+      .status-label {
+        color: var(--text-muted);
+
+        font-size: 13px;
+      }
+
+      /* =========================================
+           MOBILE
+        ========================================= */
+
+      @media (max-width: 700px) {
+        .student-admin-actions {
+          width: 100%;
+
+          margin-left: 0;
+
+          justify-content: flex-start;
+
+          flex-wrap: wrap;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- =========================================
+         HEADER
+    ========================================== -->
+
+    <header class="main-header">
+      <div class="header-content">
+        <a href="/" class="back-button"> ← Back to Dashboard </a>
+
+        <div>
+          <h1>Student Analytics</h1>
+
+          <p>Academic • Placement • Skills & Readiness</p>
+        </div>
+
+        <!-- =================================
+                 ADMIN UPDATE ACTION
+            ================================== -->
+
+        {% if session.get('admin_logged_in') %}
+
+        <div class="student-admin-actions">
+          <span class="admin-label"> 🟢 Admin </span>
+
+          <a
+            href="{{ url_for('edit_student', student_id=student.student_id) }}"
+            class="update-student-button"
+          >
+            ✏️ Update Student
+          </a>
+        </div>
+
+        {% endif %}
+      </div>
+    </header>
+
+    <!-- =========================================
+         MAIN
+    ========================================== -->
+
+    <main class="container">
+      <!-- =====================================
+             STUDENT PROFILE
+        ====================================== -->
+
+      <section class="dashboard-section">
+        <div class="profile-card">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 20px;
+              flex-wrap: wrap;
+            "
+          >
+            <div
+              class="student-icon"
+              style="width: 70px; height: 70px; font-size: 28px"
+            >
+              {{ student.name[0] | upper }}
+            </div>
+
+            <div>
+              <h2
+                style="
+                  font-size: 30px;
+                  margin-bottom: 8px;
+                  color: var(--cyan-bright);
+                "
+              >
+                {{ student.name }}
+              </h2>
+
+              <p style="color: var(--text-secondary); margin-bottom: 8px">
+                Student ID: {{ student.student_id }}
+              </p>
+
+              <span class="student-department"> {{ student.department }} </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================
+             ACADEMIC DASHBOARD
+        ====================================== -->
+
+      <section class="dashboard-section">
+        <div class="section-title">
+          <h2>Academic Dashboard</h2>
+
+          <p>Academic performance and learning information</p>
+        </div>
+
+        <div class="dashboard-grid">
+          <!-- Academic Information -->
+
+          <div class="dashboard-card">
+            <h3 style="color: var(--cyan); margin-bottom: 18px">
+              Academic Information
+            </h3>
+
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                gap: 15px;
+                padding: 12px 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+              "
+            >
+              <span style="color: var(--text-muted)"> Student ID </span>
+
+              <strong style="color: var(--text-primary)">
+                {{ student.student_id }}
+              </strong>
+            </div>
+
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                gap: 15px;
+                padding: 12px 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+              "
+            >
+              <span style="color: var(--text-muted)"> Student Name </span>
+
+              <strong style="color: var(--text-primary)">
+                {{ student.name }}
+              </strong>
+            </div>
+
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                gap: 15px;
+                padding: 12px 0;
+              "
+            >
+              <span style="color: var(--text-muted)"> Department </span>
+
+              <strong style="color: var(--text-primary)">
+                {{ student.department }}
+              </strong>
+            </div>
+          </div>
+
+          <!-- Academic Status -->
+
+          <div class="dashboard-card">
+            <h3 style="color: var(--purple); margin-bottom: 18px">
+              Academic Status
+            </h3>
+
+            <div class="status-box">
+              <div class="status-number">{{ student.student_id }}</div>
+
+              <div class="status-label">Student ID</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =====================================
+             PLACEMENT DASHBOARD
+        ====================================== -->
+
+      <section class="dashboard-section">
+        <div class="section-title">
+          <h2>Placement Dashboard</h2>
+
+          <p>Placement status and recruitment information</p>
+        </div>
+
+        <div class="dashboard-grid">
+          <!-- Placement Information -->
+
+          <div class="dashboard-card">
+            <h3 style="color: var(--green); margin-bottom: 18px">
+              Placement Information
+            </h3>
+
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                gap: 15px;
+                padding: 12px 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+              "
+            >
+              <span style="color: var(--text-muted)"> Placement Records </span>
+
+              <strong style="color: var(--text-primary)">
+                {{ placement_count }}
+              </strong>
+            </div>
+
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                gap: 15px;
+                padding: 12px 0;
+              "
+            >
+              <span style="color: var(--text-muted)"> Student </span>
+
+              <strong style="color: var(--text-primary)">
+                {{ student.name }}
+              </strong>
+            </div>
+          </div>
+
+          <!-- Placement Result -->
+
+          <div class="dashboard-card">
+            <h3 style="color: var(--pink); margin-bottom: 18px">
+              Placement Result
+            </h3>
+
+            <div
+              style="
+                padding: 22px;
+                text-align: center;
+                border-radius: 12px;
+                background: rgba(255, 78, 205, 0.05);
+                border: 1px solid rgba(255, 78, 205, 0.16);
+              "
+            >
+              <div
+                style="
+                  color: var(--text-muted);
+                  font-size: 13px;
+                  margin-bottom: 8px;
+                "
+              >
+                Overall Placement
+              </div>
+
+              <strong style="color: var(--green); font-size: 25px">
+                {{ placement_status }}
+              </strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Placement Records -->
+
+        <div class="dashboard-card">
+          <h3 style="color: var(--cyan); margin-bottom: 18px">
+            Placement Records
+          </h3>
+
+          {% if placements %}
+
+          <div style="overflow-x: auto">
+            <table>
+              <thead>
+                <tr>
+                  {% for key in placements[0].keys() %}
+
+                  <th>{{ key | replace("_", " ") | title }}</th>
+
+                  {% endfor %}
+                </tr>
+              </thead>
+
+              <tbody>
+                {% for record in placements %}
+
+                <tr>
+                  {% for value in record.values() %}
+
+                  <td>{{ value }}</td>
+
+                  {% endfor %}
+                </tr>
+
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          {% else %}
+
+          <div class="empty-state">No placement records available.</div>
+
+          {% endif %}
+        </div>
+      </section>
+
+      <!-- =====================================
+             SKILLS & READINESS
+        ====================================== -->
+
+      <section class="dashboard-section">
+        <div class="section-title">
+          <h2>Skills & Readiness Dashboard</h2>
+
+          <p>Technical skills and placement readiness</p>
+        </div>
+
+        <div class="dashboard-grid">
+          <!-- Skills -->
+
+          <div class="dashboard-card">
+            <h3 style="color: var(--cyan); margin-bottom: 18px">Skills</h3>
+
+            <div
+              style="
+                padding: 20px;
+                text-align: center;
+                border-radius: 12px;
+                background: rgba(0, 229, 255, 0.04);
+                border: 1px solid rgba(0, 229, 255, 0.12);
+              "
+            >
+              <div
+                style="
+                  color: var(--cyan-bright);
+                  font-size: 32px;
+                  font-weight: 700;
+                "
+              >
+                {{ skill_count }}
+              </div>
+
+              <div
+                style="
+                  color: var(--text-muted);
+                  font-size: 13px;
+                  margin-top: 6px;
+                "
+              >
+                Skill Records
+              </div>
+            </div>
+          </div>
+
+          <!-- Readiness -->
+
+          <div class="dashboard-card">
+            <h3 style="color: var(--green); margin-bottom: 18px">
+              Placement Readiness
+            </h3>
+
+            <div
+              style="
+                padding: 22px;
+                text-align: center;
+                border-radius: 12px;
+                background: rgba(0, 255, 157, 0.04);
+                border: 1px solid rgba(0, 255, 157, 0.14);
+              "
+            >
+              <strong style="color: var(--green); font-size: 22px">
+                {% if placements %} PLACED {% else %} NOT PLACED {% endif %}
+              </strong>
+
+              <p
+                style="
+                  color: var(--text-muted);
+                  margin-top: 8px;
+                  font-size: 13px;
+                "
+              >
+                Current placement readiness status
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Skills Records -->
+
+        <div class="dashboard-card">
+          <h3 style="color: var(--purple); margin-bottom: 18px">
+            Skills Records
+          </h3>
+
+          {% if skills %}
+
+          <div style="overflow-x: auto">
+            <table>
+              <thead>
+                <tr>
+                  {% for key in skills[0].keys() %}
+
+                  <th>{{ key | replace("_", " ") | title }}</th>
+
+                  {% endfor %}
+                </tr>
+              </thead>
+
+              <tbody>
+                {% for record in skills %}
+
+                <tr>
+                  {% for value in record.values() %}
+
+                  <td>{{ value }}</td>
+
+                  {% endfor %}
+                </tr>
+
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          {% else %}
+
+          <div class="empty-state">No skill records available.</div>
+
+          {% endif %}
+        </div>
+      </section>
+
+      <!-- =====================================
+             FINAL SUMMARY
+        ====================================== -->
+
+      <section class="dashboard-section">
+        <div class="profile-card" style="text-align: center">
+          <h2 style="color: var(--cyan-bright); margin-bottom: 10px">
+            Student Analytics Completed
+          </h2>
+
+          <p style="color: var(--text-secondary); line-height: 1.7">
+            Academic information, placement information and skills readiness for
+            <strong>{{ student.name }}</strong>
+            are displayed above.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <!-- =========================================
+         FOOTER
+    ========================================== -->
+
+    <footer class="main-footer">
+      <p>Placement Analytics System</p>
+
+      <span> AI &amp; Data Science </span>
+    </footer>
+  </body>
+</html>
