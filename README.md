@@ -1,12 +1,8 @@
 # Student Placement Analytics System
 
-A full-stack **Student Placement Analytics System** developed to manage, analyze, and visualize student academic performance, placement information, technical skills, and career readiness through an interactive web-based dashboard.
+A full-stack web application for managing and analyzing student academic performance, placement details, technical skills, and career readiness through an interactive dashboard.
 
-## 📌 Project Overview
-
-The Student Placement Analytics System provides a centralized platform for managing student placement-related information and presenting meaningful analytics through an interactive dashboard.
-
-The system allows users to search and select individual students to view their academic performance, placement details, skills, and readiness information. An authenticated admin can update student, placement, and skill-related information.
+The system provides student-wise analytics with search functionality, interactive visualizations, and secure admin access for updating student, placement, and skill information.
 
 ## 🚀 Key Features
 
