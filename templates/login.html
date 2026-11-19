@@ -1,187 +1,288 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Admin Login</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Portal Login | Placement Analytics System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-    body {
-        margin: 0;
-        padding: 0;
-        background: #050816;
-        color: white;
-        font-family: Arial, sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-    }
+        body {
+            margin: 0;
+            padding: 20px;
+            background: radial-gradient(circle at 50% 20%, rgba(0, 229, 255, 0.08), transparent 45%),
+                        radial-gradient(circle at 80% 80%, rgba(155, 92, 255, 0.08), transparent 45%),
+                        #050816;
+            color: #ffffff;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-    .login-box {
-        width: 380px;
-        padding: 30px;
-        background: #0a1228;
-        border: 1px solid #00e5ff;
-        border-radius: 15px;
-        box-shadow: 0 0 25px rgba(0, 229, 255, 0.25);
-    }
+        .login-card {
+            width: 100%;
+            max-width: 440px;
+            padding: 36px 32px;
+            background: rgba(13, 23, 48, 0.95);
+            border: 1px solid rgba(0, 229, 255, 0.35);
+            border-radius: 18px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 229, 255, 0.15);
+            backdrop-filter: blur(12px);
+        }
 
-    h1 {
-        text-align: center;
-        color: #00e5ff;
-    }
+        .login-header {
+            text-align: center;
+            margin-bottom: 26px;
+        }
 
-    .subtitle {
-        text-align: center;
-        color: #aaa;
-        margin-bottom: 25px;
-    }
+        .login-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 14px;
+            border-radius: 14px;
+            background: rgba(0, 229, 255, 0.12);
+            border: 1px solid rgba(0, 229, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+        }
 
-    label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: bold;
-    }
+        .login-header h1 {
+            color: #00f7ff;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+            letter-spacing: -0.5px;
+        }
 
-    input {
-        width: 100%;
-        box-sizing: border-box;
-        padding: 12px;
-        margin-bottom: 18px;
-        background: #080f24;
-        color: white;
-        border: 1px solid #31506b;
-        border-radius: 8px;
-        font-size: 15px;
-    }
+        .login-header p {
+            color: #a8b3c7;
+            font-size: 13px;
+            margin: 0;
+        }
 
-    .password-box {
-        position: relative;
-    }
+        /* Demo Key Autofill Pill */
+        .demo-credentials-box {
+            background: rgba(0, 229, 255, 0.06);
+            border: 1px dashed rgba(0, 229, 255, 0.35);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
 
-    .password-box input {
-        padding-right: 70px;
-    }
+        .demo-text {
+            font-size: 12px;
+            color: #dce7ff;
+            line-height: 1.4;
+        }
 
-    .show-button {
-        position: absolute;
-        right: 8px;
-        top: 9px;
-        background: none;
-        border: none;
-        color: #00e5ff;
-        font-weight: bold;
-        cursor: pointer;
-    }
+        .demo-text strong {
+            color: #00ff9d;
+        }
 
-    .login-button {
-        width: 100%;
-        padding: 13px;
-        background: rgba(0, 229, 255, 0.12);
-        color: #00e5ff;
-        border: 1px solid #00e5ff;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-    }
+        .autofill-btn {
+            background: rgba(0, 229, 255, 0.18);
+            border: 1px solid #00e5ff;
+            color: #00f7ff;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
 
-    .login-button:hover {
-        background: rgba(0, 229, 255, 0.25);
-    }
+        .autofill-btn:hover {
+            background: #00e5ff;
+            color: #050816;
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+        }
 
-    .error {
-        padding: 10px;
-        margin-bottom: 15px;
-        background: rgba(255, 50, 80, 0.15);
-        color: #ff6b81;
-        border-radius: 8px;
-        text-align: center;
-    }
+        .form-label {
+            display: block;
+            margin-bottom: 7px;
+            color: #dce7ff;
+            font-size: 13px;
+            font-weight: 600;
+        }
 
-    .back {
-        display: block;
-        margin-top: 20px;
-        text-align: center;
-        color: #999;
-        text-decoration: none;
-    }
-</style>
+        .form-input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 12px 14px;
+            margin-bottom: 18px;
+            background: rgba(5, 8, 22, 0.85);
+            color: #ffffff;
+            border: 1px solid rgba(0, 229, 255, 0.25);
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        .form-input:focus {
+            border-color: #00e5ff;
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
+        }
+
+        .password-container {
+            position: relative;
+            margin-bottom: 22px;
+        }
+
+        .password-container .form-input {
+            margin-bottom: 0;
+            padding-right: 70px;
+        }
+
+        .show-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #00e5ff;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .login-submit-btn {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.25), rgba(155, 92, 255, 0.25));
+            border: 1px solid #00e5ff;
+            color: #ffffff;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+        }
+
+        .login-submit-btn:hover {
+            background: #00e5ff;
+            color: #050816;
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .error-banner {
+            padding: 12px;
+            margin-bottom: 18px;
+            background: rgba(255, 77, 109, 0.15);
+            border: 1px solid rgba(255, 77, 109, 0.35);
+            color: #ff6b81;
+            border-radius: 10px;
+            font-size: 13px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            text-align: center;
+            width: 100%;
+            color: #a8b3c7;
+            font-size: 13px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #00f7ff;
+        }
+    </style>
 </head>
 
 <body>
-
-<div class="login-box">
-
-    <h1>Admin Login</h1>
-
-    <div class="subtitle">
-        Placement Analytics System
-    </div>
-
-    {% if error %}
-    <div class="error">
-        {{ error }}
-    </div>
-    {% endif %}
-
-    <form method="POST">
-
-        <label for="username">Login ID</label>
-
-        <input
-            type="email"
-            id="username"
-            name="username"
-            placeholder="Enter login ID"
-            required
-        >
-
-        <label for="password">Password</label>
-
-        <div class="password-box">
-
-            <input
-                type="password"
-                id="password"
-                name="password"
-                placeholder="Enter password"
-                required
-            >
-
-            <button
-                type="button"
-                class="show-button"
-                onclick="togglePassword()">
-                Show
-            </button>
-
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-icon">🔐</div>
+            <h1>Admin Authentication</h1>
+            <p>Placement Analytics System • Enterprise Portal</p>
         </div>
 
-        <button type="submit" class="login-button">
-            Login
-        </button>
+        <!-- Demo Keys Autofill Helper -->
+        <div class="demo-credentials-box">
+            <div class="demo-text">
+                Demo ID: <strong>lithikportal@gmail.com</strong><br>
+                Key: <strong>lithik@123</strong>
+            </div>
+            <button type="button" class="autofill-btn" onclick="autofillDemo()">⚡ Quick Fill</button>
+        </div>
 
-    </form>
+        {% if error %}
+        <div class="error-banner">
+            ⚠️ {{ error }}
+        </div>
+        {% endif %}
 
-    <a href="{{ url_for('home') }}" class="back">
-        Back to Dashboard
-    </a>
+        <form method="POST">
+            <label class="form-label" for="username">Administrator Email / ID</label>
+            <input
+                type="email"
+                id="username"
+                name="username"
+                class="form-input"
+                placeholder="lithikportal@gmail.com"
+                required
+                autocomplete="username"
+            >
 
-</div>
+            <label class="form-label" for="password">Security Password</label>
+            <div class="password-container">
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-input"
+                    placeholder="Enter password"
+                    required
+                    autocomplete="current-password"
+                >
+                <button type="button" class="show-toggle" onclick="togglePassword()">Show</button>
+            </div>
 
-<script>
-    function togglePassword() {
-        var password = document.getElementById("password");
-        var button = document.querySelector(".show-button");
+            <button type="submit" class="login-submit-btn">Authorize &amp; Sign In</button>
+        </form>
 
-        if (password.type === "password") {
-            password.type = "text";
-            button.innerHTML = "Hide";
-        } else {
-            password.type = "password";
-            button.innerHTML = "Show";
+        <a href="{{ url_for('home') }}" class="back-link">← Return to Dashboard</a>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const pwd = document.getElementById("password");
+            const btn = document.querySelector(".show-toggle");
+            if (pwd.type === "password") {
+                pwd.type = "text";
+                btn.textContent = "Hide";
+            } else {
+                pwd.type = "password";
+                btn.textContent = "Show";
+            }
         }
-    }
-</script>
 
+        function autofillDemo() {
+            document.getElementById("username").value = "lithikportal@gmail.com";
+            document.getElementById("password").value = "lithik@123";
+            const btn = document.querySelector(".login-submit-btn");
+            btn.style.boxShadow = "0 0 25px rgba(0, 255, 157, 0.6)";
+            setTimeout(() => {
+                btn.style.boxShadow = "";
+            }, 1000);
+        }
+    </script>
 </body>
 </html>
