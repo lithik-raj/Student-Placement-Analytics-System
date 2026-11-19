@@ -15,20 +15,40 @@ app = Flask(
     static_url_path="/static"
 )
 
-# WSGI Middleware to handle Vercel internal rewrites (/api/index, /api/index.py)
+# WSGI Middleware to handle Vercel serverless proxy routing and rewrites
 class PrefixMiddleware:
     def __init__(self, wsgi_app):
         self.wsgi_app = wsgi_app
 
     def __call__(self, environ, start_response):
-        path = environ.get('PATH_INFO', '')
-        for prefix in ['/api/index.py', '/api/index']:
-            if path == prefix:
-                environ['PATH_INFO'] = '/'
+        # 1. Prefer original client URI passed by Vercel edge proxy
+        orig_uri = None
+        for key in [
+            'HTTP_X_MATCHED_PATH',
+            'HTTP_X_VERCEL_MATCHED_PATH',
+            'REQUEST_URI',
+            'HTTP_X_FORWARDED_URI',
+            'HTTP_X_NOW_PATHNAME',
+            'HTTP_X_REWRITE_URL',
+            'RAW_URI',
+        ]:
+            val = environ.get(key)
+            if val and not val.startswith('/api/index'):
+                orig_uri = val.split('?')[0]
                 break
-            elif path.startswith(prefix + '/'):
-                environ['PATH_INFO'] = path[len(prefix):]
-                break
+
+        if orig_uri:
+            environ['PATH_INFO'] = orig_uri
+        else:
+            path = environ.get('PATH_INFO', '')
+            for prefix in ['/api/index.py', '/api/index']:
+                if path == prefix:
+                    environ['PATH_INFO'] = '/'
+                    break
+                elif path.startswith(prefix + '/'):
+                    environ['PATH_INFO'] = path[len(prefix):]
+                    break
+
         return self.wsgi_app(environ, start_response)
 
 app.wsgi_app = PrefixMiddleware(app.wsgi_app)
