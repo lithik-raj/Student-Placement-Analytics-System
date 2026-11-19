@@ -14,6 +14,27 @@ app = Flask(
     static_url_path="/static"
 )
 
+class PrefixMiddleware:
+    """
+    Normalizes PATH_INFO so that Vercel internal rewrites (/api/index, /api/index.py, /api)
+    seamlessly route to Flask root routes without raising 404 Not Found.
+    """
+    def __init__(self, wsgi_app):
+        self.wsgi_app = wsgi_app
+
+    def __call__(self, environ, start_response):
+        path = environ.get('PATH_INFO', '')
+        for prefix in ['/api/index.py', '/api/index', '/api']:
+            if path == prefix:
+                environ['PATH_INFO'] = '/'
+                break
+            elif path.startswith(prefix + '/'):
+                environ['PATH_INFO'] = path[len(prefix):]
+                break
+        return self.wsgi_app(environ, start_response)
+
+app.wsgi_app = PrefixMiddleware(app.wsgi_app)
+
 app.secret_key = os.environ.get("SECRET_KEY", "placement_analytics_admin_secret_key")
 
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "lithikportal@gmail.com")
