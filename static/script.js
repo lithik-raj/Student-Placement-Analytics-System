@@ -405,10 +405,21 @@ function initStudentDirectory() {
         }
       }
 
+      const avatarUrl = `https://i.pravatar.cc/150?u=stu_${s.student_id}`;
+      const fallbackUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(s.name || "Student")}`;
+
       return `
         <div class="student-card-enhanced">
           <div class="student-card-top">
-            <div class="student-avatar">${initial}</div>
+            <div class="student-avatar-wrapper">
+              <img
+                src="${avatarUrl}"
+                alt="${escapeHtml(s.name)}"
+                class="student-avatar-img"
+                loading="lazy"
+                onerror="this.onerror=null; this.src='${fallbackUrl}';"
+              />
+            </div>
             <div class="student-meta">
               <a href="/student/${s.student_id}" style="text-decoration: none; color: inherit;">
                 <div class="student-name-text">${escapeHtml(s.name)}</div>

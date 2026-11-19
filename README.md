@@ -51,7 +51,12 @@ You can deploy your own instance of this application to your Vercel account inst
 
 ## 🚀 Key Features
 
-* **Admin Authentication Gatekeeper:** Unauthenticated visitors are automatically routed to the Admin Authentication Portal (`/login`) with 1-click Demo Quick-Fill credentials (`lithikportal@gmail.com` / `lithik@123`).
+* **Visual Front Page & Showcase Imagery:** Rich visual imagery displayed directly on the front page:
+  - **Hero Showcase Banner with Image:** High-definition campus placement and career intelligence banner displayed prominently on the front page dashboard.
+  - **Corporate Recruiter Logos:** Official logos for premier recruiting partners (Google, Microsoft, Amazon, Adobe, Oracle, Cisco, JPMorgan Chase, Zoho).
+  - **1,200 Student Profile Images:** Every student card across all 1,200 profiles renders an authentic high-resolution student avatar photo with automatic DiceBear fallback.
+  - **Split-Screen Authentication Landing:** Front page login interface featuring campus analytics hero visual imagery, key highlights, 1-click demo login, and guest mode browsing.
+* **Admin Authentication Gatekeeper:** Unauthenticated visitors land on the Admin Portal (`/login`) with 1-click Demo Quick-Fill credentials (`lithikportal@gmail.com` / `lithik@123`) or can browse directly via Guest Mode.
 * **1,200 Comprehensive Student Profiles:** Complete cohort management covering student ID, contact, department, academic year, CGPA, verified technical skillsets, and placement records.
 * **Instant 1,200 Student Directory & Pagination:**
   - Fast, responsive pagination engine with **« First**, **‹ Prev**, **[1] [2] ... [50]**, **Next ›**, and **Last »** buttons.

@@ -88,7 +88,20 @@ def login():
 def logout():
     session.pop("admin_logged_in", None)
     session.pop("admin_username", None)
+    session.pop("guest_mode", None)
     return redirect(url_for("login"))
+
+
+@app.route("/guest-login")
+def guest_login():
+    session["guest_mode"] = True
+    session["admin_logged_in"] = False
+    session["admin_username"] = "Guest Viewer"
+    return redirect(url_for("home"))
+
+
+def is_authorized_to_view():
+    return session.get("admin_logged_in", False) or session.get("guest_mode", False)
 
 
 def admin_required():
@@ -102,7 +115,7 @@ def admin_required():
 @app.route("/")
 def home():
     # Admin portal comes first for authentication
-    if not admin_required():
+    if not is_authorized_to_view():
         return redirect(url_for("login"))
 
     db = get_db_connection()

@@ -38,6 +38,84 @@
     <main class="container">
 
       <!-- ==============================
+           FRONT PAGE HERO SHOWCASE BANNER WITH IMAGE
+      =============================== -->
+      <section class="front-page-hero-card">
+        <div class="hero-left-col">
+          <div class="hero-pill-tag">
+            <span class="live-dot"></span> LIVE PLACEMENT COHORT (1,200 PROFILES)
+          </div>
+          <h2 class="hero-heading">Enterprise Student Career &amp; <span>Academic Intelligence</span></h2>
+          <p class="hero-description">
+            High-precision analytics dashboard visualizing 1,200 student profiles with academic CGPA distribution, corporate recruitment offers, verified technical competency matrices, and automated career readiness scoring.
+          </p>
+          <div class="hero-feature-tags">
+            <span class="feature-tag">🎯 85.4% Placement Rate</span>
+            <span class="feature-tag">💼 32.5 LPA Highest Offer</span>
+            <span class="feature-tag">⚡ 16 Industry Competencies</span>
+            <span class="feature-tag">📜 Official Completion Certificates</span>
+          </div>
+        </div>
+        <div class="hero-right-col">
+          <div class="hero-image-frame">
+            <img
+              src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=750&q=80"
+              alt="Placement Analytics Intelligence Platform"
+              class="hero-display-image"
+            />
+            <div class="hero-image-overlay">
+              <span>🎓 Verified Placement &amp; Academic Intelligence</span>
+              <span>1,200 Students</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================
+           CORPORATE RECRUITING PARTNERS SHOWCASE
+      =============================== -->
+      <section class="recruiter-showcase-section">
+        <div class="recruiter-showcase-header">
+          <h3>🏢 Premier Recruiting Partners Hiring From 1,200 Cohort</h3>
+          <span style="font-size: 11px; color: var(--cyan); font-weight: 600;">Super Dream &amp; Dream Recruiters</span>
+        </div>
+        <div class="recruiter-logos-row">
+          <div class="recruiter-logo-pill">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="Google" class="recruiter-logo-img" />
+            <span>Google</span>
+          </div>
+          <div class="recruiter-logo-pill">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/9/96/Microsoft_logo_%282012%29.svg" alt="Microsoft" class="recruiter-logo-img" />
+            <span>Microsoft</span>
+          </div>
+          <div class="recruiter-logo-pill">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon" class="recruiter-logo-img" />
+            <span>Amazon</span>
+          </div>
+          <div class="recruiter-logo-pill">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5f/Adobe_Systems_logo_and_wordmark.svg" alt="Adobe" class="recruiter-logo-img" />
+            <span>Adobe</span>
+          </div>
+          <div class="recruiter-logo-pill">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg" alt="Oracle" class="recruiter-logo-img" />
+            <span>Oracle</span>
+          </div>
+          <div class="recruiter-logo-pill">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Cisco_logo_blue_2016.svg" alt="Cisco" class="recruiter-logo-img" />
+            <span>Cisco</span>
+          </div>
+          <div class="recruiter-logo-pill">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/af/J_P_Morgan_Chase_Logo_2008_1.svg" alt="JPMorgan" class="recruiter-logo-img" />
+            <span>JPMorgan</span>
+          </div>
+          <div class="recruiter-logo-pill">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/6/6d/Zoho_Corporation_2019_logo.svg" alt="Zoho" class="recruiter-logo-img" />
+            <span>Zoho</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================
            1. EXECUTIVE SUMMARY METRICS
       =============================== -->
       <section class="dashboard-section">
@@ -241,7 +319,15 @@
           {% for student in initial_students %}
           <div class="student-card-enhanced">
             <div class="student-card-top">
-              <div class="student-avatar">{{ student.name[0] | upper }}</div>
+              <div class="student-avatar-wrapper">
+                <img
+                  src="https://i.pravatar.cc/150?u=stu_{{ student.student_id }}"
+                  alt="{{ student.name }}"
+                  class="student-avatar-img"
+                  loading="lazy"
+                  onerror="this.onerror=null; this.src='https://api.dicebear.com/7.x/avataaars/svg?seed={{ student.name | urlencode }}';"
+                />
+              </div>
               <div class="student-meta">
                 <a href="/student/{{ student.student_id }}" style="text-decoration: none; color: inherit;">
                   <div class="student-name-text">{{ student.name }}</div>
