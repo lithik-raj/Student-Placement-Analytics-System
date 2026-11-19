@@ -18,126 +18,35 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            box-sizing: border-box;
         }
 
-        .login-split-card {
+        .login-card {
             width: 100%;
-            max-width: 940px;
-            background: rgba(13, 23, 48, 0.96);
+            max-width: 440px;
+            padding: 36px 32px;
+            background: rgba(13, 23, 48, 0.95);
             border: 1px solid rgba(0, 229, 255, 0.35);
-            border-radius: 22px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 35px rgba(0, 229, 255, 0.15);
-            backdrop-filter: blur(14px);
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            overflow: hidden;
-        }
-
-        /* Left Column: Visual Image Showcase */
-        .login-visual-side {
-            position: relative;
-            background: #081126;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            overflow: hidden;
-            border-right: 1px solid rgba(0, 229, 255, 0.2);
-        }
-
-        .login-hero-img-box {
-            position: relative;
-            height: 100%;
-            min-height: 480px;
-        }
-
-        .login-hero-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            filter: brightness(0.75) contrast(1.1);
-            transition: transform 0.6s ease;
-        }
-
-        .login-visual-side:hover .login-hero-image {
-            transform: scale(1.04);
-        }
-
-        .login-visual-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(5, 8, 22, 0.4) 0%, rgba(5, 8, 22, 0.85) 75%, rgba(5, 8, 22, 0.98) 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 32px 28px;
-        }
-
-        .visual-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 5px 12px;
-            background: rgba(0, 229, 255, 0.15);
-            border: 1px solid rgba(0, 229, 255, 0.4);
-            border-radius: 20px;
-            color: #00f7ff;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 12px;
-            align-self: flex-start;
-        }
-
-        .visual-title {
-            font-size: 24px;
-            font-weight: 800;
-            color: #ffffff;
-            margin: 0 0 8px 0;
-            line-height: 1.25;
-        }
-
-        .visual-subtitle {
-            font-size: 13px;
-            color: #dce7ff;
-            line-height: 1.5;
-            margin: 0 0 16px 0;
-        }
-
-        .visual-highlights-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .visual-highlights-list li {
-            font-size: 12px;
-            color: #a8b3c7;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .visual-highlights-list li strong {
-            color: #00ff9d;
-        }
-
-        /* Right Column: Authentication Form */
-        .login-form-side {
-            padding: 38px 34px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            border-radius: 18px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 229, 255, 0.15);
+            backdrop-filter: blur(12px);
         }
 
         .login-header {
-            text-align: left;
-            margin-bottom: 22px;
+            text-align: center;
+            margin-bottom: 26px;
+        }
+
+        .login-icon {
+            width: 56px;
+            height: 56px;
+            margin: 0 auto 14px;
+            border-radius: 14px;
+            background: rgba(0, 229, 255, 0.12);
+            border: 1px solid rgba(0, 229, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
         }
 
         .login-header h1 {
@@ -159,16 +68,16 @@
             background: rgba(0, 229, 255, 0.06);
             border: 1px dashed rgba(0, 229, 255, 0.35);
             border-radius: 12px;
-            padding: 12px 14px;
-            margin-bottom: 20px;
+            padding: 14px 16px;
+            margin-bottom: 22px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 10px;
+            gap: 12px;
         }
 
         .demo-text {
-            font-size: 11px;
+            font-size: 12px;
             color: #dce7ff;
             line-height: 1.4;
         }
@@ -177,18 +86,13 @@
             color: #00ff9d;
         }
 
-        .demo-actions {
-            display: flex;
-            gap: 6px;
-        }
-
         .autofill-btn {
             background: rgba(0, 229, 255, 0.18);
             border: 1px solid #00e5ff;
             color: #00f7ff;
-            padding: 6px 10px;
+            padding: 6px 12px;
             border-radius: 8px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
@@ -201,43 +105,24 @@
             box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
         }
 
-        .oneclick-btn {
-            background: linear-gradient(135deg, #00ff9d, #00e5ff);
-            border: none;
-            color: #050816;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 700;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s ease;
-            box-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
-        }
-
-        .oneclick-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 0 15px rgba(0, 255, 157, 0.6);
-        }
-
         .form-label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 7px;
             color: #dce7ff;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
         }
 
         .form-input {
             width: 100%;
             box-sizing: border-box;
-            padding: 11px 14px;
-            margin-bottom: 16px;
+            padding: 12px 14px;
+            margin-bottom: 18px;
             background: rgba(5, 8, 22, 0.85);
             color: #ffffff;
             border: 1px solid rgba(0, 229, 255, 0.25);
             border-radius: 10px;
-            font-size: 13px;
+            font-size: 14px;
             outline: none;
             transition: all 0.25s ease;
         }
@@ -249,23 +134,23 @@
 
         .password-container {
             position: relative;
-            margin-bottom: 20px;
+            margin-bottom: 22px;
         }
 
         .password-container .form-input {
             margin-bottom: 0;
-            padding-right: 65px;
+            padding-right: 70px;
         }
 
         .show-toggle {
             position: absolute;
-            right: 10px;
+            right: 12px;
             top: 50%;
             transform: translateY(-50%);
             background: none;
             border: none;
             color: #00e5ff;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             padding: 4px;
@@ -273,12 +158,12 @@
 
         .login-submit-btn {
             width: 100%;
-            padding: 12px;
+            padding: 13px;
             background: linear-gradient(135deg, rgba(0, 229, 255, 0.25), rgba(155, 92, 255, 0.25));
             border: 1px solid #00e5ff;
             color: #ffffff;
             border-radius: 10px;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.25s ease;
@@ -292,138 +177,88 @@
             transform: translateY(-1px);
         }
 
-        .guest-link-btn {
-            display: block;
-            text-align: center;
-            width: 100%;
-            box-sizing: border-box;
-            margin-top: 12px;
-            padding: 11px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            color: #a8b3c7;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.2s ease;
-        }
-
-        .guest-link-btn:hover {
-            background: rgba(0, 229, 255, 0.1);
-            border-color: #00e5ff;
-            color: #00f7ff;
-        }
-
         .error-banner {
-            padding: 10px 14px;
-            margin-bottom: 16px;
+            padding: 12px;
+            margin-bottom: 18px;
             background: rgba(255, 77, 109, 0.15);
             border: 1px solid rgba(255, 77, 109, 0.35);
             color: #ff6b81;
             border-radius: 10px;
-            font-size: 12px;
+            font-size: 13px;
             text-align: center;
             font-weight: 600;
         }
 
-        @media (max-width: 768px) {
-            .login-split-card {
-                grid-template-columns: 1fr;
-            }
-            .login-hero-img-box {
-                min-height: 220px;
-                height: 220px;
-            }
-            .login-form-side {
-                padding: 26px 20px;
-            }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            text-align: center;
+            width: 100%;
+            color: #a8b3c7;
+            font-size: 13px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: #00f7ff;
         }
     </style>
 </head>
 
 <body>
-    <div class="login-split-card">
-        <!-- Left Side: Visual Image Showcase -->
-        <div class="login-visual-side">
-            <div class="login-hero-img-box">
-                <img
-                    src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80"
-                    alt="Campus Placement Analytics System"
-                    class="login-hero-image"
-                />
-                <div class="login-visual-overlay">
-                    <span class="visual-badge">🎓 Placement Intelligence</span>
-                    <h2 class="visual-title">Student Placement &amp; Career Analytics</h2>
-                    <p class="visual-subtitle">
-                        Comprehensive analytics platform managing 1,200 student profiles, academic CGPA, recruiter milestones, and verified skillsets.
-                    </p>
-                    <ul class="visual-highlights-list">
-                        <li><span>✓</span> <strong>1,200</strong> Student Cohort Coverage</li>
-                        <li><span>✓</span> <strong>Chart.js</strong> Interactive Visual Analytics</li>
-                        <li><span>✓</span> <strong>Official</strong> Performance Completion Certificates</li>
-                        <li><span>✓</span> <strong>Instant</strong> Multi-Filter Search Engine</li>
-                    </ul>
-                </div>
-            </div>
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-icon">🔐</div>
+            <h1>Admin Authentication</h1>
+            <p>Placement Analytics System • Enterprise Portal</p>
         </div>
 
-        <!-- Right Side: Authentication Form -->
-        <div class="login-form-side">
-            <div class="login-header">
-                <h1>Admin Authentication</h1>
-                <p>Sign in to access student management &amp; analytics</p>
+        <!-- Demo Keys Autofill Helper -->
+        <div class="demo-credentials-box">
+            <div class="demo-text">
+                Demo ID: <strong>lithikportal@gmail.com</strong><br>
+                Key: <strong>lithik@123</strong>
             </div>
+            <button type="button" class="autofill-btn" onclick="autofillDemo()">⚡ Quick Fill</button>
+        </div>
 
-            <!-- Demo Keys Autofill Helper -->
-            <div class="demo-credentials-box">
-                <div class="demo-text">
-                    Demo ID: <strong>lithikportal@gmail.com</strong><br>
-                    Key: <strong>lithik@123</strong>
-                </div>
-                <div class="demo-actions">
-                    <button type="button" class="autofill-btn" onclick="autofillDemo()">⚡ Quick Fill</button>
-                    <button type="button" class="oneclick-btn" onclick="oneClickLogin()">🚀 1-Click Login</button>
-                </div>
-            </div>
+        {% if error %}
+        <div class="error-banner">
+            ⚠️ {{ error }}
+        </div>
+        {% endif %}
 
-            {% if error %}
-            <div class="error-banner">
-                ⚠️ {{ error }}
-            </div>
-            {% endif %}
+        <form method="POST">
+            <label class="form-label" for="username">Administrator Email / ID</label>
+            <input
+                type="email"
+                id="username"
+                name="username"
+                class="form-input"
+                placeholder="lithikportal@gmail.com"
+                required
+                autocomplete="username"
+            >
 
-            <form method="POST" id="loginForm">
-                <label class="form-label" for="username">Administrator Email / ID</label>
+            <label class="form-label" for="password">Security Password</label>
+            <div class="password-container">
                 <input
-                    type="email"
-                    id="username"
-                    name="username"
+                    type="password"
+                    id="password"
+                    name="password"
                     class="form-input"
-                    placeholder="lithikportal@gmail.com"
+                    placeholder="Enter password"
                     required
-                    autocomplete="username"
+                    autocomplete="current-password"
                 >
+                <button type="button" class="show-toggle" onclick="togglePassword()">Show</button>
+            </div>
 
-                <label class="form-label" for="password">Security Password</label>
-                <div class="password-container">
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        class="form-input"
-                        placeholder="Enter password"
-                        required
-                        autocomplete="current-password"
-                    >
-                    <button type="button" class="show-toggle" onclick="togglePassword()">Show</button>
-                </div>
+            <button type="submit" class="login-submit-btn">Authorize &amp; Sign In</button>
+        </form>
 
-                <button type="submit" class="login-submit-btn">Authorize &amp; Sign In</button>
-            </form>
-
-            <a href="/guest-login" class="guest-link-btn">👁️ Browse Front Page Dashboard (Guest Mode) →</a>
-        </div>
+        <a href="{{ url_for('home') }}" class="back-link">← Return to Dashboard</a>
     </div>
 
     <script>
@@ -442,11 +277,11 @@
         function autofillDemo() {
             document.getElementById("username").value = "lithikportal@gmail.com";
             document.getElementById("password").value = "lithik@123";
-        }
-
-        function oneClickLogin() {
-            autofillDemo();
-            document.getElementById("loginForm").submit();
+            const btn = document.querySelector(".login-submit-btn");
+            btn.style.boxShadow = "0 0 25px rgba(0, 255, 157, 0.6)";
+            setTimeout(() => {
+                btn.style.boxShadow = "";
+            }, 1000);
         }
     </script>
 </body>
