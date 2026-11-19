@@ -1,0 +1,12 @@
+.git
+.gitignore
+.vercel
+__pycache__
+*.py[cod]
+*$py.class
+*.db
+*.sqlite3
+venv
+.venv
+my_sql.py
+README.md

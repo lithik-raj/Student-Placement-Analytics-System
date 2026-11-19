@@ -1,44 +1,38 @@
+import os
+import sys
 from flask import Flask, render_template, abort, request, redirect, url_for, session
-import mysql.connector
 
-app = Flask(__name__)
+# Import robust database manager
+from db import get_db_connection
 
-app.secret_key = "placement_analytics_admin_secret_key"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-ADMIN_USERNAME = "lithikportal@gmail.com"
-ADMIN_PASSWORD = "lithik@123"
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, "templates"),
+    static_folder=os.path.join(BASE_DIR, "static"),
+    static_url_path="/static"
+)
 
+app.secret_key = os.environ.get("SECRET_KEY", "placement_analytics_admin_secret_key")
 
-# =========================================================
-# DATABASE CONNECTION
-# =========================================================
-
-def get_db_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="bornl2006",
-        database="placement_analytics"
-    )
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "lithikportal@gmail.com")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "lithik@123")
 
 
 # =========================================================
-# ADMIN LOGIN
+# ADMIN LOGIN / LOGOUT
 # =========================================================
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-
     if request.method == "POST":
-
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
 
         if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
-
             session["admin_logged_in"] = True
             session["admin_username"] = username
-
             return redirect(url_for("home"))
 
         return render_template(
@@ -51,10 +45,8 @@ def login():
 
 @app.route("/logout")
 def logout():
-
     session.pop("admin_logged_in", None)
     session.pop("admin_username", None)
-
     return redirect(url_for("home"))
 
 
@@ -68,39 +60,30 @@ def admin_required():
 
 @app.route("/")
 def home():
-
     db = get_db_connection()
     cursor = db.cursor(dictionary=True)
 
     try:
+        cursor.execute("SELECT COUNT(*) AS total FROM students")
+        total_students_res = cursor.fetchone()
+        total_students = total_students_res["total"] if total_students_res else 0
 
-        cursor.execute(
-            "SELECT COUNT(*) AS total FROM students"
-        )
-        total_students = cursor.fetchone()["total"]
+        cursor.execute("SELECT COUNT(*) AS total FROM placements")
+        total_placements_res = cursor.fetchone()
+        total_placements = total_placements_res["total"] if total_placements_res else 0
 
-        cursor.execute(
-            "SELECT COUNT(*) AS total FROM placements"
-        )
-        total_placements = cursor.fetchone()["total"]
+        cursor.execute("SELECT COUNT(*) AS total FROM companies")
+        total_companies_res = cursor.fetchone()
+        total_companies = total_companies_res["total"] if total_companies_res else 0
 
-        cursor.execute(
-            "SELECT COUNT(*) AS total FROM companies"
-        )
-        total_companies = cursor.fetchone()["total"]
+        cursor.execute("SELECT COUNT(*) AS total FROM skills")
+        total_skills_res = cursor.fetchone()
+        total_skills = total_skills_res["total"] if total_skills_res else 0
 
-        cursor.execute(
-            "SELECT COUNT(*) AS total FROM skills"
-        )
-        total_skills = cursor.fetchone()["total"]
-
-        unplaced_students = total_students - total_placements
+        unplaced_students = max(0, total_students - total_placements)
 
         if total_students > 0:
-            placement_percentage = round(
-                (total_placements / total_students) * 100,
-                2
-            )
+            placement_percentage = round((total_placements / total_students) * 100, 2)
         else:
             placement_percentage = 0
 
@@ -112,7 +95,6 @@ def home():
             FROM students
             ORDER BY student_id
         """)
-
         students = cursor.fetchall()
 
         cursor.execute("""
@@ -126,7 +108,6 @@ def home():
             GROUP BY s.department
             ORDER BY placed_students DESC
         """)
-
         department_data = cursor.fetchall()
 
         return render_template(
@@ -142,7 +123,6 @@ def home():
         )
 
     finally:
-
         cursor.close()
         db.close()
 
@@ -152,16 +132,11 @@ def home():
 # =========================================================
 
 def get_student_dashboard_data(student_id):
-
     db = get_db_connection()
     cursor = db.cursor(dictionary=True)
 
     try:
-
-        # -------------------------------------------------
         # STUDENT INFORMATION
-        # -------------------------------------------------
-
         cursor.execute("""
             SELECT
                 student_id,
@@ -174,17 +149,12 @@ def get_student_dashboard_data(student_id):
             FROM students
             WHERE student_id = %s
         """, (student_id,))
-
         student = cursor.fetchone()
 
         if not student:
             return None
 
-
-        # -------------------------------------------------
         # PLACEMENT INFORMATION
-        # -------------------------------------------------
-
         cursor.execute("""
             SELECT
                 p.placement_id,
@@ -201,14 +171,9 @@ def get_student_dashboard_data(student_id):
             WHERE p.student_id = %s
             ORDER BY p.placement_id DESC
         """, (student_id,))
-
         placements = cursor.fetchall()
 
-
-        # -------------------------------------------------
         # STUDENT SKILLS
-        # -------------------------------------------------
-
         cursor.execute("""
             SELECT
                 ss.student_id,
@@ -221,20 +186,9 @@ def get_student_dashboard_data(student_id):
             WHERE ss.student_id = %s
             ORDER BY s.skill_name
         """, (student_id,))
-
         skills = cursor.fetchall()
 
-
-        # -------------------------------------------------
-        # STATUS
-        # -------------------------------------------------
-
-        placement_status = (
-            "PLACED"
-            if placements
-            else "NOT PLACED"
-        )
-
+        placement_status = "PLACED" if placements else "NOT PLACED"
 
         return {
             "student": student,
@@ -246,7 +200,6 @@ def get_student_dashboard_data(student_id):
         }
 
     finally:
-
         cursor.close()
         db.close()
 
@@ -257,7 +210,6 @@ def get_student_dashboard_data(student_id):
 
 @app.route("/student/<int:student_id>")
 def student_dashboard(student_id):
-
     data = get_student_dashboard_data(student_id)
 
     if not data:
@@ -273,29 +225,16 @@ def student_dashboard(student_id):
 # ADMIN - EDIT STUDENT
 # =========================================================
 
-@app.route(
-    "/student/<int:student_id>/edit",
-    methods=["GET", "POST"]
-)
+@app.route("/student/<int:student_id>/edit", methods=["GET", "POST"])
 def edit_student(student_id):
-
-    # -----------------------------------------------------
-    # ADMIN ONLY
-    # -----------------------------------------------------
-
     if not admin_required():
         return redirect(url_for("login"))
-
 
     db = get_db_connection()
     cursor = db.cursor(dictionary=True)
 
     try:
-
-        # =================================================
         # GET STUDENT
-        # =================================================
-
         cursor.execute("""
             SELECT
                 student_id,
@@ -308,17 +247,12 @@ def edit_student(student_id):
             FROM students
             WHERE student_id = %s
         """, (student_id,))
-
         student = cursor.fetchone()
 
         if not student:
             abort(404)
 
-
-        # =================================================
         # GET CURRENT PLACEMENT
-        # =================================================
-
         cursor.execute("""
             SELECT
                 p.placement_id,
@@ -334,14 +268,9 @@ def edit_student(student_id):
             ORDER BY p.placement_id DESC
             LIMIT 1
         """, (student_id,))
-
         placement = cursor.fetchone()
 
-
-        # =================================================
         # GET ALL COMPANIES
-        # =================================================
-
         cursor.execute("""
             SELECT
                 company_id,
@@ -350,14 +279,9 @@ def edit_student(student_id):
             FROM companies
             ORDER BY company_name
         """)
-
         companies = cursor.fetchall()
 
-
-        # =================================================
         # GET ALL AVAILABLE SKILLS
-        # =================================================
-
         cursor.execute("""
             SELECT
                 skill_id,
@@ -365,14 +289,9 @@ def edit_student(student_id):
             FROM skills
             ORDER BY skill_name
         """)
-
         all_skills = cursor.fetchall()
 
-
-        # =================================================
         # GET STUDENT'S CURRENT SKILLS
-        # =================================================
-
         cursor.execute("""
             SELECT
                 skill_id,
@@ -380,89 +299,27 @@ def edit_student(student_id):
             FROM student_skills
             WHERE student_id = %s
         """, (student_id,))
-
         current_skills = cursor.fetchall()
 
+        current_skill_map = {
+            int(skill["skill_id"]): (skill["proficiency"] or "")
+            for skill in current_skills
+        }
 
-        # Create dictionary:
-        # skill_id -> proficiency
-
-        current_skill_map = {}
-
-        for skill in current_skills:
-
-            current_skill_map[
-                int(skill["skill_id"])
-            ] = skill["proficiency"] or ""
-
-
-        # =================================================
         # POST - SAVE CHANGES
-        # =================================================
-
         if request.method == "POST":
+            name = request.form.get("name", "").strip()
+            email = request.form.get("email", "").strip() or None
+            department = request.form.get("department", "").strip() or None
+            year_value = request.form.get("year", "").strip()
+            cgpa_value = request.form.get("cgpa", "").strip()
+            gender = request.form.get("gender", "").strip() or None
 
-            # -------------------------------------------------
-            # STUDENT INFORMATION
-            # -------------------------------------------------
-
-            name = request.form.get(
-                "name",
-                ""
-            ).strip()
-
-            email = request.form.get(
-                "email",
-                ""
-            ).strip()
-
-            department = request.form.get(
-                "department",
-                ""
-            ).strip()
-
-            year_value = request.form.get(
-                "year",
-                ""
-            ).strip()
-
-            cgpa_value = request.form.get(
-                "cgpa",
-                ""
-            ).strip()
-
-            gender = request.form.get(
-                "gender",
-                ""
-            ).strip()
-
-
-            # -------------------------------------------------
-            # PLACEMENT INFORMATION
-            # -------------------------------------------------
-
-            placement_status = request.form.get(
-                "placement_status",
-                "NOT PLACED"
-            ).strip()
-
-            company_id_value = request.form.get(
-                "company_id",
-                ""
-            ).strip()
-
-            placement_date = request.form.get(
-                "placement_date",
-                ""
-            ).strip()
-
-
-            # -------------------------------------------------
-            # VALIDATE NAME
-            # -------------------------------------------------
+            placement_status = request.form.get("placement_status", "NOT PLACED").strip()
+            company_id_value = request.form.get("company_id", "").strip()
+            placement_date = request.form.get("placement_date", "").strip()
 
             if not name:
-
                 return render_template(
                     "edit_student.html",
                     student=student,
@@ -473,44 +330,18 @@ def edit_student(student_id):
                     error="Student name cannot be empty."
                 )
 
-
-            # -------------------------------------------------
-            # YEAR
-            # -------------------------------------------------
-
+            year = None
             if year_value:
-
                 try:
                     year = int(year_value)
-
                 except ValueError:
+                    year = year_value
 
-                    return render_template(
-                        "edit_student.html",
-                        student=student,
-                        placement=placement,
-                        companies=companies,
-                        all_skills=all_skills,
-                        current_skill_map=current_skill_map,
-                        error="Year must be a valid number."
-                    )
-
-            else:
-
-                year = None
-
-
-            # -------------------------------------------------
-            # CGPA
-            # -------------------------------------------------
-
+            cgpa = None
             if cgpa_value:
-
                 try:
                     cgpa = float(cgpa_value)
-
                 except ValueError:
-
                     return render_template(
                         "edit_student.html",
                         student=student,
@@ -521,29 +352,7 @@ def edit_student(student_id):
                         error="CGPA must be a valid number."
                     )
 
-            else:
-
-                cgpa = None
-
-
-            # -------------------------------------------------
-            # EMPTY OPTIONAL VALUES
-            # -------------------------------------------------
-
-            if not email:
-                email = None
-
-            if not department:
-                department = None
-
-            if not gender:
-                gender = None
-
-
-            # =================================================
             # UPDATE STUDENT
-            # =================================================
-
             cursor.execute("""
                 UPDATE students
                 SET
@@ -554,37 +363,16 @@ def edit_student(student_id):
                     cgpa = %s,
                     gender = %s
                 WHERE student_id = %s
-            """, (
-                name,
-                email,
-                department,
-                year,
-                cgpa,
-                gender,
-                student_id
-            ))
+            """, (name, email, department, year, cgpa, gender, student_id))
 
-
-            # =================================================
             # UPDATE PLACEMENT
-            # =================================================
-
             if placement_status.upper() == "NOT PLACED":
-
                 cursor.execute("""
                     DELETE FROM placements
                     WHERE student_id = %s
                 """, (student_id,))
-
-
             else:
-
-                # ---------------------------------------------
-                # COMPANY REQUIRED
-                # ---------------------------------------------
-
                 if not company_id_value:
-
                     return render_template(
                         "edit_student.html",
                         student=student,
@@ -595,15 +383,9 @@ def edit_student(student_id):
                         error="Please select a company for a placed student."
                     )
 
-
                 try:
-
-                    company_id = int(
-                        company_id_value
-                    )
-
+                    company_id = int(company_id_value)
                 except ValueError:
-
                     return render_template(
                         "edit_student.html",
                         student=student,
@@ -614,13 +396,7 @@ def edit_student(student_id):
                         error="Invalid company selected."
                     )
 
-
-                # ---------------------------------------------
-                # UPDATE EXISTING PLACEMENT
-                # ---------------------------------------------
-
                 if placement:
-
                     cursor.execute("""
                         UPDATE placements
                         SET
@@ -631,19 +407,10 @@ def edit_student(student_id):
                     """, (
                         company_id,
                         placement_status,
-                        placement_date
-                        if placement_date
-                        else None,
+                        placement_date if placement_date else None,
                         placement["placement_id"]
                     ))
-
-
-                # ---------------------------------------------
-                # CREATE NEW PLACEMENT
-                # ---------------------------------------------
-
                 else:
-
                     cursor.execute("""
                         INSERT INTO placements
                         (
@@ -657,66 +424,23 @@ def edit_student(student_id):
                         student_id,
                         company_id,
                         placement_status,
-                        placement_date
-                        if placement_date
-                        else None
+                        placement_date if placement_date else None
                     ))
 
-
-            # =================================================
             # UPDATE STUDENT SKILLS
-            # =================================================
-
-            # First remove existing skill records
-            # for this student.
-
             cursor.execute("""
                 DELETE FROM student_skills
                 WHERE student_id = %s
             """, (student_id,))
 
-
-            # -------------------------------------------------
-            # Read selected skills
-            #
-            # edit_student.html should send:
-            #
-            # skill_ids = selected skill IDs
-            # proficiency_<skill_id> = proficiency
-            # -------------------------------------------------
-
-            selected_skill_ids = request.form.getlist(
-                "skill_ids"
-            )
-
-
-            # -------------------------------------------------
-            # Insert selected skills
-            # -------------------------------------------------
-
+            selected_skill_ids = request.form.getlist("skill_ids")
             for skill_id_value in selected_skill_ids:
-
                 try:
-
-                    skill_id = int(
-                        skill_id_value
-                    )
-
+                    skill_id = int(skill_id_value)
                 except ValueError:
-
                     continue
 
-
-                proficiency = request.form.get(
-                    f"proficiency_{skill_id}",
-                    ""
-                ).strip()
-
-
-                # Default proficiency
-                if not proficiency:
-                    proficiency = "Beginner"
-
+                proficiency = request.form.get(f"proficiency_{skill_id}", "").strip() or "Beginner"
 
                 cursor.execute("""
                     INSERT INTO student_skills
@@ -726,35 +450,10 @@ def edit_student(student_id):
                         proficiency
                     )
                     VALUES (%s, %s, %s)
-                """, (
-                    student_id,
-                    skill_id,
-                    proficiency
-                ))
-
-
-            # =================================================
-            # SAVE EVERYTHING
-            # =================================================
+                """, (student_id, skill_id, proficiency))
 
             db.commit()
-
-
-            # =================================================
-            # RETURN TO STUDENT DASHBOARD
-            # =================================================
-
-            return redirect(
-                url_for(
-                    "student_dashboard",
-                    student_id=student_id
-                )
-            )
-
-
-        # =================================================
-        # GET REQUEST - SHOW EDIT PAGE
-        # =================================================
+            return redirect(url_for("student_dashboard", student_id=student_id))
 
         return render_template(
             "edit_student.html",
@@ -765,44 +464,26 @@ def edit_student(student_id):
             current_skill_map=current_skill_map
         )
 
-
-    # =====================================================
-    # ERROR HANDLING
-    # =================================================
-
     except Exception as e:
-
         db.rollback()
-
         return render_template(
             "edit_student.html",
             student=student,
-            placement=placement
-            if "placement" in locals()
-            else None,
-            companies=companies
-            if "companies" in locals()
-            else [],
-            all_skills=all_skills
-            if "all_skills" in locals()
-            else [],
-            current_skill_map=current_skill_map
-            if "current_skill_map" in locals()
-            else {},
+            placement=placement if "placement" in locals() else None,
+            companies=companies if "companies" in locals() else [],
+            all_skills=all_skills if "all_skills" in locals() else [],
+            current_skill_map=current_skill_map if "current_skill_map" in locals() else {},
             error="Update failed: " + str(e)
         )
 
-
     finally:
-
         cursor.close()
         db.close()
 
 
 # =========================================================
-# RUN APPLICATION
+# RUN APPLICATION LOCALLY
 # =========================================================
 
 if __name__ == "__main__":
-    app.run(debug=True)
-
+    app.run(debug=True, port=int(os.environ.get("PORT", 5000)))

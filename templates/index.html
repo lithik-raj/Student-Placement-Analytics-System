@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Placement Analytics Dashboard</title>
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+
+  <body>
+    <!-- ==============================
+         HEADER
+    =============================== -->
+    <header class="main-header">
+      <div class="header-content">
+        <div>
+          <h1>Placement Analytics System</h1>
+          <p>Student Placement &amp; Career Analytics Dashboard</p>
+        </div>
+
+        <!-- ==============================
+             ADMIN LOGIN
+        =============================== -->
+
+        <div class="admin-login-area">
+          {% if session.get('admin_logged_in') %}
+
+          <span class="admin-status"> 🟢 Admin </span>
+
+          <a href="/logout" class="admin-login-button"> Logout </a>
+
+          {% else %}
+
+          <a href="/login" class="admin-login-button"> 🔐 Admin Login </a>
+
+          {% endif %}
+        </div>
+      </div>
+    </header>
+
+    <!-- ==============================
+         MAIN CONTENT
+    =============================== -->
+    <main class="container">
+      <!-- ==============================
+           OVERALL SUMMARY
+      =============================== -->
+      <section class="dashboard-section">
+        <div class="section-title">
+          <h2>Overall Analytics</h2>
+          <p>Placement statistics from the database</p>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-card">
+            <span class="summary-label">Total Students</span>
+            <strong class="summary-value"> {{ total_students }} </strong>
+          </div>
+
+          <div class="summary-card">
+            <span class="summary-label">Total Placements</span>
+            <strong class="summary-value"> {{ total_placements }} </strong>
+          </div>
+
+          <div class="summary-card">
+            <span class="summary-label">Companies</span>
+            <strong class="summary-value"> {{ total_companies }} </strong>
+          </div>
+
+          <div class="summary-card">
+            <span class="summary-label">Skills Records</span>
+            <strong class="summary-value"> {{ total_skills }} </strong>
+          </div>
+
+          <div class="summary-card">
+            <span class="summary-label">Placement Rate</span>
+            <strong class="summary-value"> {{ placement_percentage }}% </strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================
+           DEPARTMENT ANALYTICS
+      =============================== -->
+      <section class="dashboard-section">
+        <div class="section-title">
+          <h2>Department Analytics</h2>
+          <p>Placement performance by department</p>
+        </div>
+
+        <div class="department-grid">
+          {% if department_data %} {% for department in department_data %}
+
+          <div class="department-card">
+            <div class="department-header">
+              <h3>{{ department.department }}</h3>
+            </div>
+
+            <div class="department-stats">
+              <div>
+                <span>Total Students</span>
+                <strong> {{ department.total_students }} </strong>
+              </div>
+
+              <div>
+                <span>Placed Students</span>
+                <strong> {{ department.placed_students }} </strong>
+              </div>
+            </div>
+          </div>
+
+          {% endfor %} {% else %}
+
+          <div class="empty-state">No department data available.</div>
+
+          {% endif %}
+        </div>
+      </section>
+
+      <!-- ==============================
+           STUDENT SECTION
+      =============================== -->
+      <section class="dashboard-section">
+        <div class="section-title">
+          <h2>Student Dashboard</h2>
+
+          <p>
+            Select a student to view Academic, Placement and Skills analytics.
+          </p>
+        </div>
+
+        <!-- ==============================
+             STUDENT SEARCH
+        =============================== -->
+
+        <div class="student-search">
+          <input
+            type="text"
+            id="studentSearch"
+            placeholder="🔍 Search student by name or department..."
+            autocomplete="off"
+          />
+        </div>
+
+        <!-- ==============================
+             STUDENT CARDS
+        =============================== -->
+
+        <div class="students-grid" id="studentsGrid">
+          {% if students %} {% for student in students %}
+
+          <a href="/student/{{ student.student_id }}" class="student-card">
+            <div class="student-icon">{{ student.name[0] | upper }}</div>
+
+            <div class="student-info">
+              <h3>{{ student.name }}</h3>
+
+              <p>ID: {{ student.student_id }}</p>
+
+              <span class="student-department"> {{ student.department }} </span>
+            </div>
+
+            <div class="student-arrow">→</div>
+          </a>
+
+          {% endfor %} {% else %}
+
+          <div class="empty-state">No students found in the database.</div>
+
+          {% endif %}
+        </div>
+      </section>
+    </main>
+
+    <!-- ==============================
+         FOOTER
+    =============================== -->
+
+    <footer class="main-footer">
+      <p>Placement Analytics System</p>
+
+      <span> AI &amp; Data Science </span>
+    </footer>
+
+    <!-- ==============================
+         JAVASCRIPT
+    =============================== -->
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>

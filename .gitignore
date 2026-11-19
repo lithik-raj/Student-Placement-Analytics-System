@@ -1,0 +1,28 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Vercel
+.vercel/
+
+# Environment variables
+.env
+.env.local
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+
+# SQLite databases
+*.db
+*.sqlite3
+
+# Editor directories and files
+.vscode/
+*.swp
+tempCodeRunnerFile.*
+
+.vercel

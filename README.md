@@ -1,158 +1,229 @@
 # Student Placement Analytics System
 
-A full-stack web application for managing and analyzing student academic performance, placement details, technical skills, and career readiness through an interactive dashboard.
+<div align="center">
 
-The system provides student-wise analytics with search functionality, interactive visualizations, and secure admin access for updating student, placement, and skill information.
+[![Vercel Live Demo](https://img.shields.io/badge/Vercel-Live_Demo-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://student-placement-analytics-system.vercel.app/)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-3.x-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![SQLite](https://img.shields.io/badge/SQLite-Zero_Config-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![Status](https://img.shields.io/badge/Status-Live_%26_Production_Ready-brightgreen?style=for-the-badge)]()
+
+<br/>
+
+**A full-stack, enterprise-grade placement analytics and student career readiness tracking platform built with Python Flask, Chart.js, and modern cyberpunk dashboard UI.**
+
+[🚀 Explore Live Demo](https://student-placement-analytics-system.vercel.app/) • [✨ Deploy to Vercel](#-deploy-to-vercel-in-1-click) • [📖 Documentation](#-system-workflow)
+
+---
+
+</div>
+
+## 🌐 Live Demo & Instant Access
+
+The application is deployed live on Vercel and ready for instant evaluation:
+
+* **Live Demo URL:** [https://student-placement-analytics-system.vercel.app/](https://student-placement-analytics-system.vercel.app/)
+* **Default Admin Credentials:**
+  * **Email / ID:** `lithikportal@gmail.com`
+  * **Password:** `lithik@123`
+
+> [!NOTE]
+> The cloud deployment features an automatic dual-database engine. When running on serverless cloud platforms like Vercel, it uses an embedded, pre-seeded high-performance database engine so that all dashboard statistics, student profiles, charts, and admin CRUD updates function seamlessly with zero external database configuration required. When hosted on-premise or configured with cloud MySQL, it seamlessly connects to your MySQL cluster.
+
+---
+
+## ⚡ Deploy to Vercel in 1-Click
+
+You can deploy your own instance of this application to your Vercel account instantly:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Flithik-raj%2FStudent-Placement-Analytics-System)
+
+### Manual Vercel Import Steps:
+1. Log in to [Vercel Dashboard](https://vercel.com/dashboard).
+2. Click **"Add New..."** ➔ **"Project"**.
+3. Select your GitHub repository **`Student-Placement-Analytics-System`** and click **Import**.
+4. Leave Framework Preset as default (**Other** or **Flask**).
+5. Click **Deploy**. Your live URL will be active in seconds!
+
+---
 
 ## 🚀 Key Features
 
-* Student-wise analytics dashboard
-* Academic performance analysis
-* Placement status tracking
-* Company and package information
-* Student skills management
-* Skill proficiency tracking
-* Career readiness analysis
-* Student search functionality
-* Interactive data visualization
-* Admin authentication
-* Admin-only data modification
-* MySQL database integration
-* Dynamic Flask web application
-* Modern interactive dashboard interface
+* **Interactive Analytics Dashboard:** Real-time metrics on total students, placement ratios, active recruiters, and department-wise performance.
+* **Student-Wise Deep Dive:** Dedicated student profile cards showing CGPA, department, placement status, package (LPA), and skills.
+* **Skills & Readiness Matrix:** Categorized proficiency tracking (Beginner, Intermediate, Advanced, Expert) for top technical domains.
+* **Instant Search & Filter:** Client-side real-time filtering by student name or department without page reloads.
+* **Role-Based Admin Management:** Secure session-based authentication enabling administrators to update student records, modify placement packages, and adjust skill proficiency.
+* **Dual Database Architecture:** Native support for MySQL relational databases with seamless automated SQLite fallback for serverless deployments.
+* **Cyberpunk Neon UI:** Responsive, high-contrast dark theme with glowing neon accents, smooth animations, and optimized mobile layouts.
+
+---
 
 ## 📊 Dashboard Modules
 
 ### 🎓 Academic Analytics
-
-Provides student-specific academic information including:
-
-* Student details
-* Department
-* Academic year
-* CGPA
-* Academic performance visualization
+* Comprehensive student profiles (Name, ID, Department, Year, CGPA, Gender)
+* Department-wise enrollment and placement distribution visualization
+* Real-time CGPA tracking and academic performance badges
 
 ### 💼 Placement Analytics
+* Real-time status indicators (`PLACED` vs `NOT PLACED`)
+* Recruiter details (Company Name, Industry Sector, Package in LPA)
+* Placement date tracking and historical placement log
 
-Displays placement-related information including:
+### 🧠 Skills & Career Readiness
+* Technical skill inventory (Python, Machine Learning, Deep Learning, SQL, React, etc.)
+* Multi-tier proficiency ratings:
+  * 🟢 **Expert**
+  * 🔵 **Advanced**
+  * 🟡 **Intermediate**
+  * ⚪ **Beginner**
+* Direct career readiness evaluation based on skillset matches
 
-* Placement status
-* Company name
-* Industry
-* Package in LPA
-* Placement date
+---
 
-### 🧠 Skills & Readiness
+## 🛠️ Tech Stack & Architecture
 
-Provides student-specific skill analysis including:
+| Layer | Technologies |
+|---|---|
+| **Frontend** | HTML5, CSS3 (Modern Neon/Dark Grid), JavaScript (ES6+), Chart.js |
+| **Backend** | Python 3.11+, Flask 3.x, WSGI Serverless Adapter |
+| **Database** | MySQL 8.x / SQLite Dual-Engine with Automatic Schema Seeding |
+| **Deployment** | Vercel Serverless Functions (`@vercel/python`), CDN Edge Caching |
+| **Version Control** | Git, GitHub |
 
-* Technical skills
-* Skill proficiency
-* Beginner
-* Intermediate
-* Advanced
-* Expert
-* Career readiness information
+---
 
-## 🛠️ Tools & Technologies Used
+## 📁 Project Structure
 
-### Backend
+```text
+Student-Placement-Analytics-System/
+├── api/
+│   └── index.py            # Vercel Serverless Function entrypoint
+├── static/
+│   ├── script.js           # Client-side dynamic search and interactions
+│   └── style.css           # Modern neon/cyberpunk dashboard styling
+├── templates/
+│   ├── index.html          # Main placement analytics dashboard
+│   ├── login.html          # Administrator login portal
+│   ├── result.html         # Detailed student analytics view
+│   └── edit_student.html   # Admin student update & skills editor
+├── .gitignore              # Git ignored files & environments
+├── .vercelignore           # Vercel deployment exclusions
+├── app.py                  # Core Flask application & routing logic
+├── db.py                   # Resilient dual-backend database manager
+├── my_sql.py               # Local MySQL connection validator script
+├── README.md               # Project documentation & live links
+├── requirements.txt        # Production dependencies
+└── vercel.json             # Vercel serverless routing configuration
+```
 
-* **Python** – Core programming and backend development
-* **Flask** – Web application framework and server-side routing
-
-### Database
-
-* **MySQL** – Relational database management
-* **SQL** – Database queries, joins, relationships, and data management
-
-### Frontend
-
-* **HTML5** – Web page structure
-* **CSS3** – Styling, layouts, animations, and dashboard design
-* **JavaScript** – Dynamic interactions and frontend functionality
-* **Chart.js** – Interactive charts and data visualization
-
-### Development Tools
-
-* **Visual Studio Code** – Development environment
-* **Git & GitHub** – Version control and project management
-* **MySQL Workbench** – Database development and management
-
-## 🧩 Technical Skills Demonstrated
-
-* Python programming
-* Flask web development
-* SQL and relational database management
-* Database design
-* SQL joins and queries
-* CRUD operations
-* Backend development
-* Frontend development
-* HTML, CSS and JavaScript
-* Data visualization
-* Dashboard development
-* User authentication
-* Session management
-* Dynamic web pages
-* Database-driven applications
-* Full-stack application development
-
-## 🗄️ Database
-
-The application uses a relational MySQL database to manage:
-
-* Student information
-* Placement information
-* Company information
-* Skills
-* Student skill proficiency
-
-The database relationships allow the application to generate dynamic student-level analytics.
-
-## 🔐 Admin Management
-
-The system includes an authenticated admin interface that allows authorized users to:
-
-* Update student information
-* Update placement details
-* Manage company information
-* Add and update student skills
-* Update skill proficiency levels
-
-Regular users can view and search student analytics without modifying the data.
+---
 
 ## 🔄 System Workflow
 
 ```text
-Student Dashboard
-       ↓
-Search / Select Student
-       ↓
-Student Analytics Dashboard
-       ↓
- ┌───────────────┬───────────────┬──────────────────┐
- │   Academic    │   Placement   │ Skills & Readiness│
- └───────────────┴───────────────┴──────────────────┘
-       ↓
-   Admin Login
-       ↓
-  Update Student Data
+┌──────────────────────────────────────────────┐
+│           Main Dashboard (Home)              │
+│   • Placement Rate  • Department Analytics   │
+│   • Quick Search    • Student Grid Cards     │
+└───────────────────────┬──────────────────────┘
+                        │
+                        ▼ Select Student
+┌──────────────────────────────────────────────┐
+│          Student Analytics Dashboard         │
+│   ┌────────────────────┬─────────────────┐   │
+│   │ Academic Summary   │ Placement Info  │   │
+│   ├────────────────────┼─────────────────┤   │
+│   │ Technical Skills   │ Career Readiness│   │
+│   └────────────────────┴─────────────────┘   │
+└───────────────────────┬──────────────────────┘
+                        │
+                        ▼ Click "Update Student"
+┌──────────────────────────────────────────────┐
+│           Admin Authentication (Login)       │
+│   • ID: lithikportal@gmail.com               │
+│   • Password: lithik@123                     │
+└───────────────────────┬──────────────────────┘
+                        │
+                        ▼ Authenticated
+┌──────────────────────────────────────────────┐
+│            Admin Management Portal           │
+│   • Edit Academic Data (CGPA, Year, Dept)    │
+│   • Update Placements (Company, LPA, Date)   │
+│   • Assign & Adjust Skill Proficiencies      │
+└──────────────────────────────────────────────┘
 ```
+
+---
+
+## 💻 Local Installation & Setup
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/lithik-raj/Student-Placement-Analytics-System.git
+cd Student-Placement-Analytics-System
+```
+
+### 2. Create and Activate Virtual Environment
+```bash
+# Windows
+python -m venv venv
+venv\Scripts\activate
+
+# macOS / Linux
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install Dependencies
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Configure Database (Optional)
+* **Out-of-the-box (Default):** Runs immediately with zero configuration using the embedded SQLite engine and pre-seeded realistic data.
+* **With MySQL:** Set environment variables or configure your MySQL server:
+```bash
+export MYSQL_HOST="localhost"
+export MYSQL_USER="root"
+export MYSQL_PASSWORD="your_password"
+export MYSQL_DATABASE="placement_analytics"
+export MYSQL_PORT=3306
+```
+
+### 5. Run the Application
+```bash
+python app.py
+```
+Open your browser and navigate to: **`http://127.0.0.1:5000`**
+
+---
+
+## 🔐 Admin Authentication Credentials
+
+| Role | Username / Email | Password |
+|---|---|---|
+| **Primary Administrator** | `lithikportal@gmail.com` | `lithik@123` |
+
+*(Credentials can also be customized via `ADMIN_USERNAME` and `ADMIN_PASSWORD` environment variables)*
+
+---
 
 ## 🔮 Future Enhancements
 
-* Machine Learning-based placement prediction
-* Placement probability analysis
-* Company recommendation system
-* Resume analysis
-* Skill-gap recommendations
-* Placement trend forecasting
-* Automated placement reports
-* Cloud deployment
+* [ ] Machine Learning-based placement probability scoring
+* [ ] Automated resume parsing and skill-gap recommendations
+* [ ] Recruiter-specific hiring trend forecasting
+* [ ] Automated PDF placement performance report generation
+* [ ] Multi-tenant role management (Student, Staff, Recruiter, Admin)
+
+---
 
 ## 👨‍💻 Author
 
-**Lithik Raj B G**
-**B.Tech – Artificial Intelligence and Data Science**
+**Lithik Raj B G**  
+*B.Tech – Artificial Intelligence and Data Science*  
+* GitHub: [@lithik-raj](https://github.com/lithik-raj)
+* Project: [Student Placement Analytics System](https://github.com/lithik-raj/Student-Placement-Analytics-System)
