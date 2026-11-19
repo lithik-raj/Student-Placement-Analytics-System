@@ -21,34 +21,36 @@ class PrefixMiddleware:
         self.wsgi_app = wsgi_app
 
     def __call__(self, environ, start_response):
-        # 1. Prefer original client URI passed by Vercel edge proxy
-        orig_uri = None
-        for key in [
-            'HTTP_X_MATCHED_PATH',
-            'HTTP_X_VERCEL_MATCHED_PATH',
-            'REQUEST_URI',
-            'HTTP_X_FORWARDED_URI',
-            'HTTP_X_NOW_PATHNAME',
-            'HTTP_X_REWRITE_URL',
-            'RAW_URI',
-        ]:
-            val = environ.get(key)
-            if val and not val.startswith('/api/index'):
-                orig_uri = val.split('?')[0]
+        path = environ.get('PATH_INFO', '')
+
+        # 1. Strip /api/index prefix if present from rewrite
+        for prefix in ['/api/index.py', '/api/index']:
+            if path == prefix or path == prefix + '/':
+                path = '/'
+                break
+            elif path.startswith(prefix + '/'):
+                path = path[len(prefix):]
                 break
 
-        if orig_uri:
-            environ['PATH_INFO'] = orig_uri
-        else:
-            path = environ.get('PATH_INFO', '')
-            for prefix in ['/api/index.py', '/api/index']:
-                if path == prefix:
-                    environ['PATH_INFO'] = '/'
-                    break
-                elif path.startswith(prefix + '/'):
-                    environ['PATH_INFO'] = path[len(prefix):]
-                    break
+        # 2. Check proxy headers if path is still root or empty
+        if path in ('', '/'):
+            for key in [
+                'HTTP_X_MATCHED_PATH',
+                'HTTP_X_VERCEL_MATCHED_PATH',
+                'REQUEST_URI',
+                'HTTP_X_FORWARDED_URI',
+                'HTTP_X_NOW_PATHNAME',
+                'HTTP_X_REWRITE_URL',
+                'RAW_URI',
+            ]:
+                val = environ.get(key)
+                if val and not val.startswith('/api/index'):
+                    clean_val = val.split('?')[0]
+                    if clean_val and clean_val != '/':
+                        path = clean_val
+                        break
 
+        environ['PATH_INFO'] = path or '/'
         return self.wsgi_app(environ, start_response)
 
 app.wsgi_app = PrefixMiddleware(app.wsgi_app)
