@@ -1,6 +1,8 @@
 import os
 import sys
 import sqlite3
+import shutil
+from generate_data import generate_1200_database
 
 # Try importing mysql.connector
 try:
@@ -70,167 +72,42 @@ class SQLiteConnectionWrapper:
 
 
 def init_sqlite_db(db_path=SQLITE_DB_PATH):
-    """Initializes SQLite schema and inserts initial sample data if tables don't exist."""
-    os.makedirs(os.path.dirname(os.path.abspath(db_path)), exist_ok=True)
-    conn = sqlite3.connect(db_path)
-    cur = conn.cursor()
+    """
+    Initializes the SQLite database with 1,200 students.
+    If a bundled pre-generated database exists, copies it instantly.
+    Otherwise, generates the full 1,200 student dataset on the fly.
+    """
+    bundled_db = os.path.join(BASE_DIR, "placement_analytics.db")
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS students (
-        student_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        email TEXT NOT NULL,
-        department TEXT NOT NULL,
-        year TEXT NOT NULL,
-        cgpa REAL NOT NULL,
-        gender TEXT NOT NULL
-    )
-    """)
+    if not os.path.exists(db_path):
+        os.makedirs(os.path.dirname(os.path.abspath(db_path)), exist_ok=True)
+        if os.path.exists(bundled_db) and os.path.abspath(bundled_db) != os.path.abspath(db_path):
+            shutil.copy2(bundled_db, db_path)
+            return
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS companies (
-        company_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        company_name TEXT NOT NULL,
-        industry TEXT NOT NULL,
-        package_lpa REAL NOT NULL
-    )
-    """)
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS placements (
-        placement_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        student_id INTEGER NOT NULL,
-        company_id INTEGER,
-        placement_status TEXT NOT NULL,
-        placement_date TEXT,
-        FOREIGN KEY (student_id) REFERENCES students(student_id),
-        FOREIGN KEY (company_id) REFERENCES companies(company_id)
-    )
-    """)
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS skills (
-        skill_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        skill_name TEXT NOT NULL UNIQUE
-    )
-    """)
-
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS student_skills (
-        student_id INTEGER NOT NULL,
-        skill_id INTEGER NOT NULL,
-        proficiency TEXT NOT NULL,
-        PRIMARY KEY (student_id, skill_id),
-        FOREIGN KEY (student_id) REFERENCES students(student_id),
-        FOREIGN KEY (skill_id) REFERENCES skills(skill_id)
-    )
-    """)
-
-    # Check if data already seeded
-    cur.execute("SELECT COUNT(*) FROM students")
-    count = cur.fetchone()[0]
-
-    if count == 0:
-        # Seed Students
-        students_data = [
-            (1, "Lithik Raj B G", "lithikportal@gmail.com", "Artificial Intelligence & Data Science", "4th Year", 9.15, "Male"),
-            (2, "Priya Sharma", "priya.sharma@example.com", "Computer Science & Engineering", "4th Year", 9.25, "Female"),
-            (3, "Rahul Verma", "rahul.verma@example.com", "Information Technology", "4th Year", 8.45, "Male"),
-            (4, "Ananya Iyer", "ananya.iyer@example.com", "Artificial Intelligence & Data Science", "4th Year", 9.38, "Female"),
-            (5, "Karthik Raman", "karthik.r@example.com", "Electronics & Communication", "4th Year", 7.85, "Male"),
-            (6, "Sneha Patel", "sneha.p@example.com", "Computer Science & Engineering", "4th Year", 8.70, "Female"),
-            (7, "Arjun Das", "arjun.das@example.com", "Information Technology", "4th Year", 7.60, "Male"),
-            (8, "Divya Krishnan", "divya.k@example.com", "Artificial Intelligence & Data Science", "4th Year", 9.05, "Female")
-        ]
-        cur.executemany("INSERT INTO students (student_id, name, email, department, year, cgpa, gender) VALUES (?, ?, ?, ?, ?, ?, ?)", students_data)
-
-        # Seed Companies
-        companies_data = [
-            (1, "Google", "Technology & Cloud", 32.5),
-            (2, "Microsoft", "Software & Cloud Services", 28.0),
-            (3, "Amazon", "E-Commerce & AWS", 24.0),
-            (4, "Zoho Corporation", "SaaS & Enterprise", 12.0),
-            (5, "Tata Consultancy Services (TCS)", "IT Consulting", 7.5),
-            (6, "Infosys", "Digital Services", 6.5)
-        ]
-        cur.executemany("INSERT INTO companies (company_id, company_name, industry, package_lpa) VALUES (?, ?, ?, ?)", companies_data)
-
-        # Seed Skills
-        skills_data = [
-            (1, "Python"),
-            (2, "Machine Learning"),
-            (3, "SQL & Database Design"),
-            (4, "Deep Learning"),
-            (5, "Data Structures & Algorithms"),
-            (6, "React & Frontend"),
-            (7, "Flask & REST APIs"),
-            (8, "Cloud Computing (AWS/GCP)"),
-            (9, "Computer Vision"),
-            (10, "Natural Language Processing (NLP)")
-        ]
-        cur.executemany("INSERT INTO skills (skill_id, skill_name) VALUES (?, ?)", skills_data)
-
-        # Seed Placements
-        placements_data = [
-            (1, 1, 1, "PLACED", "2026-10-15"),  # Lithik -> Google
-            (2, 2, 2, "PLACED", "2026-09-20"),  # Priya -> Microsoft
-            (3, 4, 3, "PLACED", "2026-10-02"),  # Ananya -> Amazon
-            (4, 6, 4, "PLACED", "2026-10-10"),  # Sneha -> Zoho
-            (5, 3, 5, "PLACED", "2026-11-01"),  # Rahul -> TCS
-            (6, 8, 6, "PLACED", "2026-11-05")   # Divya -> Infosys
-        ]
-        cur.executemany("INSERT INTO placements (placement_id, student_id, company_id, placement_status, placement_date) VALUES (?, ?, ?, ?, ?)", placements_data)
-
-        # Seed Student Skills
-        student_skills_data = [
-            # Lithik Raj B G
-            (1, 1, "Expert"),
-            (1, 2, "Expert"),
-            (1, 3, "Advanced"),
-            (1, 4, "Advanced"),
-            (1, 7, "Expert"),
-            # Priya Sharma
-            (2, 1, "Advanced"),
-            (2, 5, "Expert"),
-            (2, 6, "Advanced"),
-            (2, 3, "Advanced"),
-            # Rahul Verma
-            (3, 1, "Intermediate"),
-            (3, 3, "Advanced"),
-            (3, 5, "Intermediate"),
-            # Ananya Iyer
-            (4, 1, "Expert"),
-            (4, 2, "Expert"),
-            (4, 9, "Advanced"),
-            (4, 10, "Expert"),
-            # Karthik Raman
-            (5, 1, "Intermediate"),
-            (5, 3, "Beginner"),
-            # Sneha Patel
-            (6, 1, "Advanced"),
-            (6, 6, "Expert"),
-            (6, 7, "Advanced"),
-            # Arjun Das
-            (7, 3, "Intermediate"),
-            (7, 5, "Intermediate"),
-            # Divya Krishnan
-            (8, 1, "Advanced"),
-            (8, 2, "Advanced"),
-            (8, 4, "Intermediate")
-        ]
-        cur.executemany("INSERT INTO student_skills (student_id, skill_id, proficiency) VALUES (?, ?, ?)", student_skills_data)
-
-        conn.commit()
-
-    conn.close()
+        generate_1200_database(db_path)
+    else:
+        # Check if table exists and has students
+        try:
+            conn = sqlite3.connect(db_path)
+            cur = conn.cursor()
+            cur.execute("SELECT COUNT(*) FROM students")
+            cnt = cur.fetchone()[0]
+            conn.close()
+            if cnt < 1200:
+                if os.path.exists(bundled_db) and os.path.abspath(bundled_db) != os.path.abspath(db_path):
+                    shutil.copy2(bundled_db, db_path)
+                else:
+                    generate_1200_database(db_path)
+        except Exception:
+            generate_1200_database(db_path)
 
 
 def get_db_connection():
     """
     Connects to MySQL if host is specified and accessible,
-    otherwise seamlessly connects to SQLite with pre-seeded demo data.
+    otherwise seamlessly connects to SQLite with the 1,200 student dataset.
     """
-    # Check if external MySQL host is provided in environment
     mysql_host = os.environ.get("MYSQL_HOST")
     use_sqlite = os.environ.get("USE_SQLITE", "").lower() in ("1", "true", "yes")
 

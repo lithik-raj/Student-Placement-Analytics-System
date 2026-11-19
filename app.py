@@ -1,6 +1,7 @@
 import os
 import sys
-from flask import Flask, render_template, abort, request, redirect, url_for, session
+import json
+from flask import Flask, render_template, abort, request, redirect, url_for, session, jsonify
 
 # Import robust database manager
 from db import get_db_connection
@@ -14,17 +15,14 @@ app = Flask(
     static_url_path="/static"
 )
 
+# WSGI Middleware to handle Vercel internal rewrites (/api/index, /api/index.py, /api)
 class PrefixMiddleware:
-    """
-    Normalizes PATH_INFO so that Vercel internal rewrites (/api/index, /api/index.py, /api)
-    seamlessly route to Flask root routes without raising 404 Not Found.
-    """
     def __init__(self, wsgi_app):
         self.wsgi_app = wsgi_app
 
     def __call__(self, environ, start_response):
         path = environ.get('PATH_INFO', '')
-        for prefix in ['/api/index.py', '/api/index', '/api']:
+        for prefix in ['/api/index.py', '/api/index']:
             if path == prefix:
                 environ['PATH_INFO'] = '/'
                 break
@@ -76,7 +74,7 @@ def admin_required():
 
 
 # =========================================================
-# HOME / MAIN DASHBOARD
+# HOME / MAIN DASHBOARD (1200 Student Analytics & Visualizations)
 # =========================================================
 
 @app.route("/")
@@ -85,13 +83,34 @@ def home():
     cursor = db.cursor(dictionary=True)
 
     try:
-        cursor.execute("SELECT COUNT(*) AS total FROM students")
-        total_students_res = cursor.fetchone()
-        total_students = total_students_res["total"] if total_students_res else 0
+        # 1. Total Metrics
+        cursor.execute("""
+            SELECT 
+                COUNT(*) as total_students,
+                ROUND(AVG(cgpa), 2) as avg_cgpa,
+                SUM(CASE WHEN readiness_status = 'Elite Ready' THEN 1 ELSE 0 END) as elite_count,
+                SUM(CASE WHEN readiness_status = 'Job Ready' THEN 1 ELSE 0 END) as job_ready_count
+            FROM students
+        """)
+        m_students = cursor.fetchone() or {}
+        total_students = m_students.get("total_students", 0)
+        avg_cgpa = m_students.get("avg_cgpa", 0.0)
+        elite_count = m_students.get("elite_count", 0)
+        job_ready_count = m_students.get("job_ready_count", 0)
 
-        cursor.execute("SELECT COUNT(*) AS total FROM placements")
-        total_placements_res = cursor.fetchone()
-        total_placements = total_placements_res["total"] if total_placements_res else 0
+        cursor.execute("""
+            SELECT 
+                COUNT(*) as total_placements,
+                ROUND(MAX(c.package_lpa), 1) as max_pkg,
+                ROUND(AVG(c.package_lpa), 2) as avg_pkg
+            FROM placements p
+            JOIN companies c ON p.company_id = c.company_id
+            WHERE p.placement_status = 'PLACED'
+        """)
+        m_placed = cursor.fetchone() or {}
+        total_placements = m_placed.get("total_placements", 0)
+        max_package = m_placed.get("max_pkg", 0.0)
+        avg_package = m_placed.get("avg_pkg", 0.0)
 
         cursor.execute("SELECT COUNT(*) AS total FROM companies")
         total_companies_res = cursor.fetchone()
@@ -102,34 +121,142 @@ def home():
         total_skills = total_skills_res["total"] if total_skills_res else 0
 
         unplaced_students = max(0, total_students - total_placements)
+        placement_percentage = round((total_placements / total_students) * 100, 1) if total_students > 0 else 0
 
-        if total_students > 0:
-            placement_percentage = round((total_placements / total_students) * 100, 2)
-        else:
-            placement_percentage = 0
-
+        # 2. Department Analytics
         cursor.execute("""
-            SELECT
-                student_id,
-                name,
-                department
-            FROM students
-            ORDER BY student_id
-        """)
-        students = cursor.fetchall()
-
-        cursor.execute("""
-            SELECT
+            SELECT 
                 s.department,
-                COUNT(DISTINCT s.student_id) AS total_students,
-                COUNT(DISTINCT p.student_id) AS placed_students
+                COUNT(DISTINCT s.student_id) as total_students,
+                COUNT(DISTINCT p.student_id) as placed_students,
+                ROUND(AVG(s.cgpa), 2) as dept_avg_cgpa,
+                ROUND(AVG(c.package_lpa), 2) as dept_avg_pkg
             FROM students s
-            LEFT JOIN placements p
-                ON s.student_id = p.student_id
+            LEFT JOIN placements p ON s.student_id = p.student_id AND p.placement_status = 'PLACED'
+            LEFT JOIN companies c ON p.company_id = c.company_id
             GROUP BY s.department
-            ORDER BY placed_students DESC
+            ORDER BY total_students DESC
         """)
         department_data = cursor.fetchall()
+
+        # Format department data with placement rate
+        for dept in department_data:
+            t = dept["total_students"]
+            p = dept["placed_students"]
+            dept["placement_rate"] = round((p / t) * 100, 1) if t > 0 else 0
+
+        # 3. Chart 1: Department Comparison
+        dept_labels = [d["department"] for d in department_data]
+        dept_totals = [d["total_students"] for d in department_data]
+        dept_placed = [d["placed_students"] for d in department_data]
+
+        # 4. Chart 2: Salary Package Tiers
+        cursor.execute("""
+            SELECT 
+                SUM(CASE WHEN c.package_lpa >= 20.0 THEN 1 ELSE 0 END) as super_dream,
+                SUM(CASE WHEN c.package_lpa >= 10.0 AND c.package_lpa < 20.0 THEN 1 ELSE 0 END) as dream,
+                SUM(CASE WHEN c.package_lpa >= 6.0 AND c.package_lpa < 10.0 THEN 1 ELSE 0 END) as regular,
+                SUM(CASE WHEN c.package_lpa < 6.0 THEN 1 ELSE 0 END) as mass
+            FROM placements p
+            JOIN companies c ON p.company_id = c.company_id
+            WHERE p.placement_status = 'PLACED'
+        """)
+        tier_row = cursor.fetchone() or {}
+        tier_labels = ["Super Dream (>20 LPA)", "Dream (10-20 LPA)", "Regular (6-10 LPA)", "Core / Mass (<6 LPA)"]
+        tier_counts = [
+            tier_row.get("super_dream", 0) or 0,
+            tier_row.get("dream", 0) or 0,
+            tier_row.get("regular", 0) or 0,
+            tier_row.get("mass", 0) or 0
+        ]
+
+        # 5. Chart 3: Top Recruiting Companies
+        cursor.execute("""
+            SELECT c.company_name, COUNT(p.placement_id) as hires, c.package_lpa
+            FROM placements p
+            JOIN companies c ON p.company_id = c.company_id
+            WHERE p.placement_status = 'PLACED'
+            GROUP BY c.company_name
+            ORDER BY hires DESC
+            LIMIT 8
+        """)
+        top_companies = cursor.fetchall()
+        company_labels = [c["company_name"] for c in top_companies]
+        company_hires = [c["hires"] for c in top_companies]
+        company_pkgs = [c["package_lpa"] for c in top_companies]
+
+        # 6. Chart 4: CGPA Academic Distribution
+        cursor.execute("""
+            SELECT 
+                SUM(CASE WHEN cgpa >= 9.0 THEN 1 ELSE 0 END) as g9,
+                SUM(CASE WHEN cgpa >= 8.0 AND cgpa < 9.0 THEN 1 ELSE 0 END) as g8,
+                SUM(CASE WHEN cgpa >= 7.0 AND cgpa < 8.0 THEN 1 ELSE 0 END) as g7,
+                SUM(CASE WHEN cgpa < 7.0 THEN 1 ELSE 0 END) as g6
+            FROM students
+        """)
+        cgpa_row = cursor.fetchone() or {}
+        cgpa_dist_labels = ["9.0 - 10.0 (Outstanding)", "8.0 - 8.9 (Distinction)", "7.0 - 7.9 (First Class)", "6.0 - 6.9 (Second Class)"]
+        cgpa_dist_counts = [
+            cgpa_row.get("g9", 0) or 0,
+            cgpa_row.get("g8", 0) or 0,
+            cgpa_row.get("g7", 0) or 0,
+            cgpa_row.get("g6", 0) or 0
+        ]
+
+        # 7. Chart 5: Top Technical Skills Demand
+        cursor.execute("""
+            SELECT sk.skill_name, COUNT(ss.student_id) as count
+            FROM student_skills ss
+            JOIN skills sk ON ss.skill_id = sk.skill_id
+            GROUP BY sk.skill_name
+            ORDER BY count DESC
+            LIMIT 10
+        """)
+        top_skills = cursor.fetchall()
+        skill_labels = [s["skill_name"] for s in top_skills]
+        skill_counts = [s["count"] for s in top_skills]
+
+        # 8. Initial First Page of Students (24 records)
+        cursor.execute("""
+            SELECT
+                s.student_id,
+                s.name,
+                s.department,
+                s.year,
+                s.cgpa,
+                s.gender,
+                s.readiness_score,
+                s.readiness_status,
+                CASE WHEN p.placement_id IS NOT NULL THEN 'PLACED' ELSE 'NOT PLACED' END as placement_status,
+                c.company_name,
+                c.package_lpa
+            FROM students s
+            LEFT JOIN placements p ON s.student_id = p.student_id AND p.placement_status = 'PLACED'
+            LEFT JOIN companies c ON p.company_id = c.company_id
+            ORDER BY s.student_id ASC
+            LIMIT 24
+        """)
+        initial_students = cursor.fetchall()
+
+        # All departments for filter dropdown
+        departments_list = [d["department"] for d in department_data]
+
+        chart_data = {
+            "dept_labels": dept_labels,
+            "dept_totals": dept_totals,
+            "dept_placed": dept_placed,
+            "status_labels": ["Placed", "Not Placed"],
+            "status_counts": [total_placements, unplaced_students],
+            "tier_labels": tier_labels,
+            "tier_counts": tier_counts,
+            "company_labels": company_labels,
+            "company_hires": company_hires,
+            "company_pkgs": company_pkgs,
+            "cgpa_dist_labels": cgpa_dist_labels,
+            "cgpa_dist_counts": cgpa_dist_counts,
+            "skill_labels": skill_labels,
+            "skill_counts": skill_counts
+        }
 
         return render_template(
             "index.html",
@@ -139,9 +266,124 @@ def home():
             total_skills=total_skills,
             unplaced_students=unplaced_students,
             placement_percentage=placement_percentage,
-            students=students,
-            department_data=department_data
+            avg_cgpa=avg_cgpa,
+            max_package=max_package,
+            avg_package=avg_package,
+            elite_count=elite_count,
+            job_ready_count=job_ready_count,
+            department_data=department_data,
+            departments_list=departments_list,
+            initial_students=initial_students,
+            chart_data_json=json.dumps(chart_data)
         )
+
+    finally:
+        cursor.close()
+        db.close()
+
+
+# =========================================================
+# FAST API - PAGINATED SEARCH & FILTER (1,200 Students)
+# =========================================================
+
+@app.route("/api/students")
+def api_students():
+    page = int(request.args.get("page", 1))
+    limit = int(request.args.get("limit", 24))
+    search = request.args.get("search", "").strip()
+    department = request.args.get("department", "").strip()
+    status = request.args.get("status", "ALL").strip().upper()
+    readiness = request.args.get("readiness", "ALL").strip()
+    sort = request.args.get("sort", "id_asc").strip().lower()
+
+    offset = (page - 1) * limit
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    try:
+        where_clauses = ["1=1"]
+        params = []
+
+        if search:
+            where_clauses.append("(s.name LIKE %s OR s.email LIKE %s OR CAST(s.student_id AS TEXT) LIKE %s)")
+            wild = f"%{search}%"
+            params.extend([wild, wild, wild])
+
+        if department and department != "ALL":
+            where_clauses.append("s.department = %s")
+            params.append(department)
+
+        if status == "PLACED":
+            where_clauses.append("p.placement_id IS NOT NULL")
+        elif status == "NOT PLACED":
+            where_clauses.append("p.placement_id IS NULL")
+
+        if readiness and readiness != "ALL":
+            where_clauses.append("s.readiness_status = %s")
+            params.append(readiness)
+
+        where_sql = " AND ".join(where_clauses)
+
+        # Sort mapping
+        sort_map = {
+            "id_asc": "s.student_id ASC",
+            "id_desc": "s.student_id DESC",
+            "name_asc": "s.name ASC",
+            "name_desc": "s.name DESC",
+            "cgpa_desc": "s.cgpa DESC",
+            "cgpa_asc": "s.cgpa ASC",
+            "readiness_desc": "s.readiness_score DESC",
+            "pkg_desc": "COALESCE(c.package_lpa, 0) DESC"
+        }
+        order_by = sort_map.get(sort, "s.student_id ASC")
+
+        # Count total matching
+        count_query = f"""
+            SELECT COUNT(DISTINCT s.student_id) as total
+            FROM students s
+            LEFT JOIN placements p ON s.student_id = p.student_id AND p.placement_status = 'PLACED'
+            WHERE {where_sql}
+        """
+        cursor.execute(count_query, params)
+        total_res = cursor.fetchone()
+        total_records = total_res["total"] if total_res else 0
+
+        # Query paginated results
+        data_query = f"""
+            SELECT
+                s.student_id,
+                s.name,
+                s.email,
+                s.department,
+                s.year,
+                s.cgpa,
+                s.gender,
+                s.readiness_score,
+                s.readiness_status,
+                CASE WHEN p.placement_id IS NOT NULL THEN 'PLACED' ELSE 'NOT PLACED' END as placement_status,
+                c.company_name,
+                c.package_lpa
+            FROM students s
+            LEFT JOIN placements p ON s.student_id = p.student_id AND p.placement_status = 'PLACED'
+            LEFT JOIN companies c ON p.company_id = c.company_id
+            WHERE {where_sql}
+            ORDER BY {order_by}
+            LIMIT %s OFFSET %s
+        """
+        query_params = list(params) + [limit, offset]
+        cursor.execute(data_query, query_params)
+        students = cursor.fetchall()
+
+        total_pages = max(1, (total_records + limit - 1) // limit)
+
+        return jsonify({
+            "students": students,
+            "total": total_records,
+            "page": page,
+            "limit": limit,
+            "total_pages": total_pages
+        })
 
     finally:
         cursor.close()
@@ -166,7 +408,9 @@ def get_student_dashboard_data(student_id):
                 department,
                 year,
                 cgpa,
-                gender
+                gender,
+                readiness_score,
+                readiness_status
             FROM students
             WHERE student_id = %s
         """, (student_id,))
@@ -211,13 +455,39 @@ def get_student_dashboard_data(student_id):
 
         placement_status = "PLACED" if placements else "NOT PLACED"
 
+        # Benchmarks: Department avg and college avg
+        cursor.execute("SELECT ROUND(AVG(cgpa), 2) as college_avg FROM students")
+        col_avg_row = cursor.fetchone()
+        college_avg_cgpa = col_avg_row["college_avg"] if col_avg_row else 8.19
+
+        cursor.execute("""
+            SELECT ROUND(AVG(cgpa), 2) as dept_avg 
+            FROM students 
+            WHERE department = %s
+        """, (student["department"],))
+        dept_avg_row = cursor.fetchone()
+        dept_avg_cgpa = dept_avg_row["dept_avg"] if dept_avg_row else 8.19
+
+        # Radar data for skills
+        prof_val_map = {"Expert": 100, "Advanced": 80, "Intermediate": 55, "Beginner": 30}
+        skill_names = [s["skill_name"] for s in skills]
+        skill_scores = [prof_val_map.get(s["proficiency"], 40) for s in skills]
+
+        student_radar_json = json.dumps({
+            "labels": skill_names,
+            "scores": skill_scores
+        })
+
         return {
             "student": student,
             "placements": placements,
             "skills": skills,
             "placement_status": placement_status,
             "placement_count": len(placements),
-            "skill_count": len(skills)
+            "skill_count": len(skills),
+            "college_avg_cgpa": college_avg_cgpa,
+            "dept_avg_cgpa": dept_avg_cgpa,
+            "student_radar_json": student_radar_json
         }
 
     finally:
@@ -226,7 +496,7 @@ def get_student_dashboard_data(student_id):
 
 
 # =========================================================
-# STUDENT DASHBOARD
+# STUDENT DASHBOARD ROUTE
 # =========================================================
 
 @app.route("/student/<int:student_id>")
@@ -264,7 +534,9 @@ def edit_student(student_id):
                 department,
                 year,
                 cgpa,
-                gender
+                gender,
+                readiness_score,
+                readiness_status
             FROM students
             WHERE student_id = %s
         """, (student_id,))
@@ -351,14 +623,9 @@ def edit_student(student_id):
                     error="Student name cannot be empty."
                 )
 
-            year = None
-            if year_value:
-                try:
-                    year = int(year_value)
-                except ValueError:
-                    year = year_value
+            year = year_value or "4th Year"
 
-            cgpa = None
+            cgpa = student["cgpa"]
             if cgpa_value:
                 try:
                     cgpa = float(cgpa_value)
@@ -373,21 +640,9 @@ def edit_student(student_id):
                         error="CGPA must be a valid number."
                     )
 
-            # UPDATE STUDENT
-            cursor.execute("""
-                UPDATE students
-                SET
-                    name = %s,
-                    email = %s,
-                    department = %s,
-                    year = %s,
-                    cgpa = %s,
-                    gender = %s
-                WHERE student_id = %s
-            """, (name, email, department, year, cgpa, gender, student_id))
-
             # UPDATE PLACEMENT
-            if placement_status.upper() == "NOT PLACED":
+            is_placed = (placement_status.upper() == "PLACED")
+            if not is_placed:
                 cursor.execute("""
                     DELETE FROM placements
                     WHERE student_id = %s
@@ -455,6 +710,9 @@ def edit_student(student_id):
             """, (student_id,))
 
             selected_skill_ids = request.form.getlist("skill_ids")
+            skill_points = 0
+            prof_map = {"Beginner": 3, "Intermediate": 5, "Advanced": 8, "Expert": 10}
+
             for skill_id_value in selected_skill_ids:
                 try:
                     skill_id = int(skill_id_value)
@@ -462,6 +720,7 @@ def edit_student(student_id):
                     continue
 
                 proficiency = request.form.get(f"proficiency_{skill_id}", "").strip() or "Beginner"
+                skill_points += prof_map.get(proficiency, 4)
 
                 cursor.execute("""
                     INSERT INTO student_skills
@@ -472,6 +731,36 @@ def edit_student(student_id):
                     )
                     VALUES (%s, %s, %s)
                 """, (student_id, skill_id, proficiency))
+
+            # Re-calculate readiness score
+            cgpa_score = (cgpa / 10.0) * 40.0
+            norm_skill_score = min(40.0, (skill_points / 45.0) * 40.0)
+            status_score = 20.0 if is_placed else 10.0
+            new_readiness = round(min(100.0, cgpa_score + norm_skill_score + status_score), 1)
+
+            if new_readiness >= 85.0:
+                new_status = "Elite Ready"
+            elif new_readiness >= 72.0:
+                new_status = "Job Ready"
+            elif new_readiness >= 55.0:
+                new_status = "Developing"
+            else:
+                new_status = "Needs Upskilling"
+
+            # UPDATE STUDENT
+            cursor.execute("""
+                UPDATE students
+                SET
+                    name = %s,
+                    email = %s,
+                    department = %s,
+                    year = %s,
+                    cgpa = %s,
+                    gender = %s,
+                    readiness_score = %s,
+                    readiness_status = %s
+                WHERE student_id = %s
+            """, (name, email, department, year, cgpa, gender, new_readiness, new_status, student_id))
 
             db.commit()
             return redirect(url_for("student_dashboard", student_id=student_id))

@@ -1043,3 +1043,384 @@ body {
     justify-content: flex-start;
   }
 }
+
+/* =========================================
+   CHART.JS VISUAL ANALYTICS SECTION
+========================================= */
+
+.analytics-charts-section {
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+.charts-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.charts-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.chart-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.chart-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--cyan);
+}
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+}
+
+.chart-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-badge {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(0, 229, 255, 0.1);
+  color: var(--cyan);
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  font-weight: 600;
+}
+
+.chart-container-inner {
+  position: relative;
+  width: 100%;
+  height: 280px;
+}
+
+/* =========================================
+   1200 STUDENTS FILTER & SEARCH BAR
+========================================= */
+
+.filter-control-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.filter-row-top {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.search-input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.search-input-wrapper input {
+  width: 100%;
+  padding: 13px 18px 13px 44px;
+  background: rgba(5, 8, 22, 0.8);
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 15px;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+.search-input-wrapper input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.25);
+}
+
+.search-icon-left {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--cyan);
+  pointer-events: none;
+  font-size: 16px;
+}
+
+.filter-row-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.custom-select {
+  padding: 9px 14px;
+  background: rgba(10, 16, 32, 0.95);
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.custom-select:focus, .custom-select:hover {
+  border-color: var(--cyan);
+}
+
+.custom-select option {
+  background: #0a1020;
+  color: #fff;
+}
+
+.results-meta {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.results-meta strong {
+  color: var(--cyan-bright);
+}
+
+/* =========================================
+   STUDENT CARDS ENHANCED (1,200 View)
+========================================= */
+
+.student-card-enhanced {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.student-card-enhanced:hover {
+  transform: translateY(-3px);
+  border-color: var(--cyan);
+  box-shadow: 0 10px 25px rgba(0, 229, 255, 0.15);
+  background: var(--bg-card-hover);
+}
+
+.student-card-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.student-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(155, 92, 255, 0.2));
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cyan-bright);
+  flex-shrink: 0;
+}
+
+.student-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.student-name-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.student-id-text {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.student-badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.badge-dept {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(155, 92, 255, 0.1);
+  color: #b58aff;
+  border: 1px solid rgba(155, 92, 255, 0.25);
+  white-space: nowrap;
+}
+
+.badge-cgpa {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(0, 229, 255, 0.1);
+  color: var(--cyan);
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  font-weight: 600;
+}
+
+.badge-status-placed {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(0, 255, 157, 0.1);
+  color: var(--green);
+  border: 1px solid rgba(0, 255, 157, 0.3);
+  font-weight: 700;
+}
+
+.badge-status-unplaced {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(255, 77, 109, 0.1);
+  color: var(--red);
+  border: 1px solid rgba(255, 77, 109, 0.3);
+  font-weight: 600;
+}
+
+.student-readiness-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.readiness-meter-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.readiness-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.readiness-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #00e5ff, #00ff9d);
+  transition: width 0.4s ease;
+}
+
+/* =========================================
+   PAGINATION CONTROLS
+========================================= */
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 35px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+}
+
+.pag-btn {
+  padding: 9px 16px;
+  background: rgba(10, 16, 32, 0.9);
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pag-btn:hover:not(:disabled) {
+  border-color: var(--cyan);
+  background: rgba(0, 229, 255, 0.12);
+  color: var(--cyan-bright);
+}
+
+.pag-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.pag-btn.active {
+  background: rgba(0, 229, 255, 0.2);
+  border-color: var(--cyan);
+  color: var(--cyan-bright);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+}
+
+.pag-summary {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 10px;
+}
+
+@media (max-width: 900px) {
+  .charts-grid-2, .charts-grid-3 {
+    grid-template-columns: 1fr;
+  }
+  .filter-row-top {
+    flex-direction: column;
+  }
+}

@@ -3,13 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <title>Placement Analytics Dashboard</title>
-
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='style.css') }}"
-    />
+    <title>Placement Analytics System | 1,200 Student Enterprise Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <!-- Chart.js for High-Precision Visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
 
   <body>
@@ -20,159 +17,266 @@
       <div class="header-content">
         <div>
           <h1>Placement Analytics System</h1>
-          <p>Student Placement &amp; Career Analytics Dashboard</p>
+          <p>Enterprise Student Placement, Academic &amp; Career Readiness Intelligence</p>
         </div>
-
-        <!-- ==============================
-             ADMIN LOGIN
-        =============================== -->
 
         <div class="admin-login-area">
           {% if session.get('admin_logged_in') %}
-
-          <span class="admin-status"> 🟢 Admin </span>
-
-          <a href="/logout" class="admin-login-button"> Logout </a>
-
+          <span class="admin-status">🟢 Admin: {{ session.get('admin_username') }}</span>
+          <a href="/logout" class="admin-login-button">Logout</a>
           {% else %}
-
-          <a href="/login" class="admin-login-button"> 🔐 Admin Login </a>
-
+          <a href="/login" class="admin-login-button">🔐 Admin Portal</a>
           {% endif %}
         </div>
       </div>
     </header>
 
     <!-- ==============================
-         MAIN CONTENT
+         MAIN CONTENT CONTAINER
     =============================== -->
     <main class="container">
+
       <!-- ==============================
-           OVERALL SUMMARY
+           1. EXECUTIVE SUMMARY METRICS
       =============================== -->
       <section class="dashboard-section">
         <div class="section-title">
-          <h2>Overall Analytics</h2>
-          <p>Placement statistics from the database</p>
+          <h2>Campus Placement Overview (1,200 Profiles)</h2>
+          <p>Real-time academic performance, recruitment trends and career readiness metrics</p>
         </div>
 
         <div class="summary-grid">
           <div class="summary-card">
-            <span class="summary-label">Total Students</span>
-            <strong class="summary-value"> {{ total_students }} </strong>
-          </div>
-
-          <div class="summary-card">
-            <span class="summary-label">Total Placements</span>
-            <strong class="summary-value"> {{ total_placements }} </strong>
-          </div>
-
-          <div class="summary-card">
-            <span class="summary-label">Companies</span>
-            <strong class="summary-value"> {{ total_companies }} </strong>
-          </div>
-
-          <div class="summary-card">
-            <span class="summary-label">Skills Records</span>
-            <strong class="summary-value"> {{ total_skills }} </strong>
+            <span class="summary-label">Total Cohort</span>
+            <strong class="summary-value">{{ total_students }}</strong>
+            <span style="font-size: 11px; color: var(--cyan); margin-top: 4px;">100% Profile Coverage</span>
           </div>
 
           <div class="summary-card">
             <span class="summary-label">Placement Rate</span>
-            <strong class="summary-value"> {{ placement_percentage }}% </strong>
+            <strong class="summary-value" style="color: var(--green);">{{ placement_percentage }}%</strong>
+            <span style="font-size: 11px; color: var(--green); margin-top: 4px;">{{ total_placements }} Placed / {{ unplaced_students }} In-Prep</span>
+          </div>
+
+          <div class="summary-card">
+            <span class="summary-label">Highest Package</span>
+            <strong class="summary-value" style="color: var(--yellow);">{{ max_package }} <small style="font-size: 14px;">LPA</small></strong>
+            <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Google Super Dream Offer</span>
+          </div>
+
+          <div class="summary-card">
+            <span class="summary-label">Average Package</span>
+            <strong class="summary-value" style="color: var(--cyan-bright);">{{ avg_package }} <small style="font-size: 14px;">LPA</small></strong>
+            <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Across All Departments</span>
+          </div>
+
+          <div class="summary-card">
+            <span class="summary-label">Average CGPA</span>
+            <strong class="summary-value">{{ avg_cgpa }}</strong>
+            <span style="font-size: 11px; color: var(--cyan); margin-top: 4px;">Cohort Academic Mean</span>
+          </div>
+
+          <div class="summary-card">
+            <span class="summary-label">Active Recruiters</span>
+            <strong class="summary-value">{{ total_companies }}</strong>
+            <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Tier 1 Tech &amp; Consulting</span>
           </div>
         </div>
       </section>
 
       <!-- ==============================
-           DEPARTMENT ANALYTICS
+           2. VISUAL ANALYTICS (CHART.JS)
       =============================== -->
-      <section class="dashboard-section">
+      <section class="dashboard-section analytics-charts-section">
         <div class="section-title">
-          <h2>Department Analytics</h2>
-          <p>Placement performance by department</p>
+          <h2>Interactive Visual Analytics</h2>
+          <p>Comprehensive charts visualized with Chart.js covering recruitment, salaries, and technical competencies</p>
         </div>
 
-        <div class="department-grid">
-          {% if department_data %} {% for department in department_data %}
-
-          <div class="department-card">
-            <div class="department-header">
-              <h3>{{ department.department }}</h3>
+        <!-- Charts Row 1: Dept Stats & Placement Doughnut -->
+        <div class="charts-grid-2">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>📊 Department Placement Distribution</h3>
+              <span class="chart-badge">Enrolled vs Placed</span>
             </div>
-
-            <div class="department-stats">
-              <div>
-                <span>Total Students</span>
-                <strong> {{ department.total_students }} </strong>
-              </div>
-
-              <div>
-                <span>Placed Students</span>
-                <strong> {{ department.placed_students }} </strong>
-              </div>
+            <div class="chart-container-inner">
+              <canvas id="deptChart"></canvas>
             </div>
           </div>
 
-          {% endfor %} {% else %}
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>🎯 Overall Placement Ratio</h3>
+              <span class="chart-badge">Cohort Breakdown</span>
+            </div>
+            <div class="chart-container-inner">
+              <canvas id="placementRatioChart"></canvas>
+            </div>
+          </div>
+        </div>
 
-          <div class="empty-state">No department data available.</div>
+        <!-- Charts Row 2: Salary Tiers & Top Recruiters -->
+        <div class="charts-grid-2">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>💼 Package Tier Distribution (LPA)</h3>
+              <span class="chart-badge">Compensation Levels</span>
+            </div>
+            <div class="chart-container-inner">
+              <canvas id="salaryTierChart"></canvas>
+            </div>
+          </div>
 
-          {% endif %}
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>🏢 Top Recruiting Partners</h3>
+              <span class="chart-badge">Offers Count</span>
+            </div>
+            <div class="chart-container-inner">
+              <canvas id="companyChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row 3: CGPA Distribution & Top Skills -->
+        <div class="charts-grid-2">
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>📈 Academic CGPA Distribution</h3>
+              <span class="chart-badge">Grade Brackets</span>
+            </div>
+            <div class="chart-container-inner">
+              <canvas id="cgpaChart"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3>⚡ High-Demand Technical Skills</h3>
+              <span class="chart-badge">Competency Matrix</span>
+            </div>
+            <div class="chart-container-inner">
+              <canvas id="skillsRadarChart"></canvas>
+            </div>
+          </div>
         </div>
       </section>
 
       <!-- ==============================
-           STUDENT SECTION
+           3. 1,200 STUDENTS DIRECTORY & MANAGEMENT
       =============================== -->
       <section class="dashboard-section">
         <div class="section-title">
-          <h2>Student Dashboard</h2>
-
-          <p>
-            Select a student to view Academic, Placement and Skills analytics.
-          </p>
+          <h2>Student Intelligence Profiles</h2>
+          <p>Instant search, filter, and drill down into any of the 1,200 student profiles</p>
         </div>
 
-        <!-- ==============================
-             STUDENT SEARCH
-        =============================== -->
+        <!-- Filter & Control Panel -->
+        <div class="filter-control-panel">
+          <div class="filter-row-top">
+            <div class="search-input-wrapper">
+              <span class="search-icon-left">🔍</span>
+              <input
+                type="text"
+                id="studentSearchInput"
+                placeholder="Search 1,200 students by Name, Email, or Student ID..."
+                autocomplete="off"
+              />
+            </div>
+          </div>
 
-        <div class="student-search">
-          <input
-            type="text"
-            id="studentSearch"
-            placeholder="🔍 Search student by name or department..."
-            autocomplete="off"
-          />
-        </div>
-
-        <!-- ==============================
-             STUDENT CARDS
-        =============================== -->
-
-        <div class="students-grid" id="studentsGrid">
-          {% if students %} {% for student in students %}
-
-          <a href="/student/{{ student.student_id }}" class="student-card">
-            <div class="student-icon">{{ student.name[0] | upper }}</div>
-
-            <div class="student-info">
-              <h3>{{ student.name }}</h3>
-
-              <p>ID: {{ student.student_id }}</p>
-
-              <span class="student-department"> {{ student.department }} </span>
+          <div class="filter-row-controls">
+            <div class="filter-group">
+              <span class="filter-label">Department:</span>
+              <select id="deptFilter" class="custom-select">
+                <option value="ALL">All Departments</option>
+                {% for dept in departments_list %}
+                <option value="{{ dept }}">{{ dept }}</option>
+                {% endfor %}
+              </select>
             </div>
 
-            <div class="student-arrow">→</div>
+            <div class="filter-group">
+              <span class="filter-label">Status:</span>
+              <select id="statusFilter" class="custom-select">
+                <option value="ALL">All Statuses</option>
+                <option value="PLACED">Placed</option>
+                <option value="NOT PLACED">Not Placed</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <span class="filter-label">Readiness:</span>
+              <select id="readinessFilter" class="custom-select">
+                <option value="ALL">All Readiness</option>
+                <option value="Elite Ready">Elite Ready (≥85%)</option>
+                <option value="Job Ready">Job Ready (72-84%)</option>
+                <option value="Developing">Developing (55-71%)</option>
+                <option value="Needs Upskilling">Needs Upskilling (&lt;55%)</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <span class="filter-label">Sort:</span>
+              <select id="sortOrder" class="custom-select">
+                <option value="id_asc">ID (Ascending)</option>
+                <option value="id_desc">ID (Descending)</option>
+                <option value="name_asc">Name (A - Z)</option>
+                <option value="cgpa_desc">CGPA (Highest First)</option>
+                <option value="readiness_desc">Readiness (Highest First)</option>
+                <option value="pkg_desc">Package (Highest LPA)</option>
+              </select>
+            </div>
+
+            <div class="results-meta">
+              Showing <strong id="resultsCount">24</strong> of <strong id="totalCount">{{ total_students }}</strong> students
+            </div>
+          </div>
+        </div>
+
+        <!-- Student Cards Grid -->
+        <div class="students-grid" id="studentsGridContainer">
+          {% for student in initial_students %}
+          <a href="/student/{{ student.student_id }}" class="student-card-enhanced">
+            <div class="student-card-top">
+              <div class="student-avatar">{{ student.name[0] | upper }}</div>
+              <div class="student-meta">
+                <div class="student-name-text">{{ student.name }}</div>
+                <div class="student-id-text">ID: #{{ student.student_id }} • {{ student.year }}</div>
+              </div>
+            </div>
+
+            <div class="student-badges-row">
+              <span class="badge-dept">{{ student.department.split(' & ')[0] }}</span>
+              <span class="badge-cgpa">CGPA: {{ student.cgpa }}</span>
+              {% if student.placement_status == 'PLACED' %}
+              <span class="badge-status-placed">✓ {{ student.company_name }} ({{ student.package_lpa }} LPA)</span>
+              {% else %}
+              <span class="badge-status-unplaced">Not Placed</span>
+              {% endif %}
+            </div>
+
+            <div class="student-readiness-meter">
+              <div class="readiness-meter-labels">
+                <span>{{ student.readiness_status }}</span>
+                <span><strong>{{ student.readiness_score }}%</strong></span>
+              </div>
+              <div class="readiness-track">
+                <div class="readiness-fill" style="width: {{ student.readiness_score }}%;"></div>
+              </div>
+            </div>
           </a>
+          {% endfor %}
+        </div>
 
-          {% endfor %} {% else %}
-
-          <div class="empty-state">No students found in the database.</div>
-
-          {% endif %}
+        <!-- Pagination Controls -->
+        <div class="pagination-controls" id="paginationControls">
+          <button class="pag-btn" id="firstPageBtn" disabled>&laquo; First</button>
+          <button class="pag-btn" id="prevPageBtn" disabled>&lsaquo; Prev</button>
+          <span class="pag-summary" id="pageSummary">Page 1 of {{ (total_students + 23) // 24 }}</span>
+          <button class="pag-btn" id="nextPageBtn">Next &rsaquo;</button>
+          <button class="pag-btn" id="lastPageBtn">Last &raquo;</button>
         </div>
       </section>
     </main>
@@ -180,16 +284,15 @@
     <!-- ==============================
          FOOTER
     =============================== -->
-
     <footer class="main-footer">
-      <p>Placement Analytics System</p>
-
-      <span> AI &amp; Data Science </span>
+      <p>Student Placement Analytics System • Managing 1,200 High-Precision Student Profiles</p>
+      <span>Designed &amp; Developed by <strong>Lithik Raj B G</strong> (AI &amp; Data Science)</span>
     </footer>
 
-    <!-- ==============================
-         JAVASCRIPT
-    =============================== -->
+    <!-- Pass Chart Data from Flask Server to Frontend Script -->
+    <script id="chartDataScript" type="application/json">
+      {{ chart_data_json | safe }}
+    </script>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
   </body>

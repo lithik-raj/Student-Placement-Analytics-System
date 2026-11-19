@@ -17,12 +17,11 @@ ENV/
 .venv/
 
 # SQLite databases
-*.db
 *.sqlite3
+# Keep pre-generated cohort database
+!placement_analytics.db
 
 # Editor directories and files
 .vscode/
 *.swp
 tempCodeRunnerFile.*
-
-.vercel
