@@ -51,7 +51,18 @@ You can deploy your own instance of this application to your Vercel account inst
 
 ## 🚀 Key Features
 
+* **Admin Authentication Gatekeeper:** Unauthenticated visitors are automatically routed to the Admin Authentication Portal (`/login`) with 1-click Demo Quick-Fill credentials (`lithikportal@gmail.com` / `lithik@123`).
 * **1,200 Comprehensive Student Profiles:** Complete cohort management covering student ID, contact, department, academic year, CGPA, verified technical skillsets, and placement records.
+* **Instant 1,200 Student Directory & Pagination:**
+  - Fast, responsive pagination engine with **« First**, **‹ Prev**, **[1] [2] ... [50]**, **Next ›**, and **Last »** buttons.
+  - Interactive skill badges and eligibility indicators on every card: **🏆 Super Dream (>20 LPA)**, **💼 Dream (10-20 LPA)**, **⚡ Core & IT (6-10 LPA)**.
+  - Sub-millisecond instant search by student name, email, or ID with department, placement status, and career readiness filters.
+* **Official Performance Completion Certificate:**
+  - Dedicated printable and downloadable Certificate of Performance Completion (`/student/<id>/certificate`) for every one of the 1,200 students.
+  - Features official autonomous board seal, verification ID, verified competencies, CGPA standing, placement milestone, and executive signatures.
+* **Admin Profile Registration (Add Student):**
+  - Integrated portal (`/student/add`) for administrators to enroll new students with name, email, department, academic year, CGPA, recruitment offer, and multi-skill proficiency matrices.
+  - Automatic real-time computation of Career Readiness score and readiness tier.
 * **Interactive Chart.js Visualizations:**
   1. **Department Placement Distribution:** Grouped bar chart comparing enrolled vs. placed students per department.
   2. **Placement Ratio Doughnut:** Real-time breakdown of Placed vs. In-Preparation cohorts.
@@ -60,10 +71,6 @@ You can deploy your own instance of this application to your Vercel account inst
   5. **Academic CGPA Spread:** Trend distribution across grade brackets.
   6. **Technical Skills Radar:** Frequency analysis of high-demand industry skills across all 1,200 students.
   7. **Student Mastery Radar:** Individual skill competency radar on every student's dedicated profile page.
-* **Sub-Millisecond Search & Multi-Filter Engine:**
-  - Real-time debounced search by Student Name, Email, or ID.
-  - Multi-criteria filtering by Department, Placement Status, and Career Readiness Level.
-  - High-performance 24-record paginated grid with instant page switching.
 * **Automated Career Readiness Scoring:**
   - Scientific formula combining academic CGPA (40%), verified skills & proficiencies (40%), and placement status (20%).
   - Categorized into: **Elite Ready (≥85%)**, **Job Ready (72-84%)**, **Developing (55-71%)**, and **Needs Upskilling (<55%)**.
@@ -113,8 +120,10 @@ Student-Placement-Analytics-System/
 │   └── style.css           # Modern neon cyberpunk responsive dashboard styling
 ├── templates/
 │   ├── index.html          # Main 1,200 student analytics dashboard & Chart.js grid
-│   ├── login.html          # Administrator login portal
+│   ├── login.html          # Administrator login portal (Gatekeeper authentication)
 │   ├── result.html         # Detailed student analytics & individual skill radar chart
+│   ├── certificate.html    # Official Performance Completion Certificate (View & Print PDF)
+│   ├── add_student.html    # Admin student registration with skills & placement scoring
 │   └── edit_student.html   # Admin student update & skills editor
 ├── .gitignore              # Git ignored files & environments
 ├── .vercelignore           # Vercel deployment exclusions

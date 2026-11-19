@@ -22,6 +22,7 @@
 
         <div class="admin-login-area">
           {% if session.get('admin_logged_in') %}
+          <a href="/student/add" class="nav-add-btn">➕ Add Student</a>
           <span class="admin-status">🟢 Admin: {{ session.get('admin_username') }}</span>
           <a href="/logout" class="admin-login-button">Logout</a>
           {% else %}
@@ -166,7 +167,7 @@
       <!-- ==============================
            3. 1,200 STUDENTS DIRECTORY & MANAGEMENT
       =============================== -->
-      <section class="dashboard-section">
+      <section class="dashboard-section" id="studentsDirectorySection">
         <div class="section-title">
           <h2>Student Intelligence Profiles</h2>
           <p>Instant search, filter, and drill down into any of the 1,200 student profiles</p>
@@ -238,11 +239,13 @@
         <!-- Student Cards Grid -->
         <div class="students-grid" id="studentsGridContainer">
           {% for student in initial_students %}
-          <a href="/student/{{ student.student_id }}" class="student-card-enhanced">
+          <div class="student-card-enhanced">
             <div class="student-card-top">
               <div class="student-avatar">{{ student.name[0] | upper }}</div>
               <div class="student-meta">
-                <div class="student-name-text">{{ student.name }}</div>
+                <a href="/student/{{ student.student_id }}" style="text-decoration: none; color: inherit;">
+                  <div class="student-name-text">{{ student.name }}</div>
+                </a>
                 <div class="student-id-text">ID: #{{ student.student_id }} • {{ student.year }}</div>
               </div>
             </div>
@@ -253,20 +256,47 @@
               {% if student.placement_status == 'PLACED' %}
               <span class="badge-status-placed">✓ {{ student.company_name }} ({{ student.package_lpa }} LPA)</span>
               {% else %}
-              <span class="badge-status-unplaced">Not Placed</span>
+              <span class="badge-status-unplaced">In Preparation</span>
+              {% endif %}
+            </div>
+
+            <div style="margin: 4px 0;">
+              {% if student.cgpa >= 8.5 %}
+              <span class="badge-eligibility-super">🏆 Super Dream Eligible (&gt;20 LPA)</span>
+              {% elif student.cgpa >= 7.5 %}
+              <span class="badge-eligibility-dream">💼 Dream Eligible (10-20 LPA)</span>
+              {% else %}
+              <span class="badge-eligibility-core">⚡ Core &amp; IT Eligible (6-10 LPA)</span>
+              {% endif %}
+            </div>
+
+            <div class="card-skills-row">
+              {% if student.skills_list %}
+                {% set skills_arr = student.skills_list.split(', ') %}
+                {% for sk in skills_arr[:4] %}
+                <span class="card-skill-tag">{{ sk }}</span>
+                {% endfor %}
+                {% if skills_arr|length > 4 %}
+                <span class="card-skill-tag" style="color: var(--cyan);">+{{ skills_arr|length - 4 }} more</span>
+                {% endif %}
               {% endif %}
             </div>
 
             <div class="student-readiness-meter">
               <div class="readiness-meter-labels">
-                <span>{{ student.readiness_status }}</span>
+                <span>Readiness: <strong>{{ student.readiness_status }}</strong></span>
                 <span><strong>{{ student.readiness_score }}%</strong></span>
               </div>
               <div class="readiness-track">
                 <div class="readiness-fill" style="width: {{ student.readiness_score }}%;"></div>
               </div>
             </div>
-          </a>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06);">
+              <a href="/student/{{ student.student_id }}" style="color: var(--cyan); font-size: 12px; font-weight: 600; text-decoration: none;">View Profile &amp; Radar →</a>
+              <a href="/student/{{ student.student_id }}/certificate" class="card-cert-quick-link">📜 Certificate</a>
+            </div>
+          </div>
           {% endfor %}
         </div>
 
@@ -274,6 +304,7 @@
         <div class="pagination-controls" id="paginationControls">
           <button class="pag-btn" id="firstPageBtn" disabled>&laquo; First</button>
           <button class="pag-btn" id="prevPageBtn" disabled>&lsaquo; Prev</button>
+          <div class="page-numbers-container" id="pageNumbersArea"></div>
           <span class="pag-summary" id="pageSummary">Page 1 of {{ (total_students + 23) // 24 }}</span>
           <button class="pag-btn" id="nextPageBtn">Next &rsaquo;</button>
           <button class="pag-btn" id="lastPageBtn">Last &raquo;</button>

@@ -15,7 +15,7 @@ app = Flask(
     static_url_path="/static"
 )
 
-# WSGI Middleware to handle Vercel internal rewrites (/api/index, /api/index.py, /api)
+# WSGI Middleware to handle Vercel internal rewrites (/api/index, /api/index.py)
 class PrefixMiddleware:
     def __init__(self, wsgi_app):
         self.wsgi_app = wsgi_app
@@ -56,7 +56,7 @@ def login():
 
         return render_template(
             "login.html",
-            error="Invalid Login ID or Password."
+            error="Invalid Administrator Login ID or Security Key."
         )
 
     return render_template("login.html")
@@ -66,7 +66,7 @@ def login():
 def logout():
     session.pop("admin_logged_in", None)
     session.pop("admin_username", None)
-    return redirect(url_for("home"))
+    return redirect(url_for("login"))
 
 
 def admin_required():
@@ -74,11 +74,15 @@ def admin_required():
 
 
 # =========================================================
-# HOME / MAIN DASHBOARD (1200 Student Analytics & Visualizations)
+# HOME / MAIN DASHBOARD (Protected - Admin Authenticated First)
 # =========================================================
 
 @app.route("/")
 def home():
+    # Admin portal comes first for authentication
+    if not admin_required():
+        return redirect(url_for("login"))
+
     db = get_db_connection()
     cursor = db.cursor(dictionary=True)
 
@@ -139,7 +143,6 @@ def home():
         """)
         department_data = cursor.fetchall()
 
-        # Format department data with placement rate
         for dept in department_data:
             t = dept["total_students"]
             p = dept["placed_students"]
@@ -216,7 +219,7 @@ def home():
         skill_labels = [s["skill_name"] for s in top_skills]
         skill_counts = [s["count"] for s in top_skills]
 
-        # 8. Initial First Page of Students (24 records)
+        # 8. Initial First Page of Students (24 records with skills_list subquery)
         cursor.execute("""
             SELECT
                 s.student_id,
@@ -229,7 +232,13 @@ def home():
                 s.readiness_status,
                 CASE WHEN p.placement_id IS NOT NULL THEN 'PLACED' ELSE 'NOT PLACED' END as placement_status,
                 c.company_name,
-                c.package_lpa
+                c.package_lpa,
+                (
+                    SELECT GROUP_CONCAT(sk.skill_name, ', ')
+                    FROM student_skills ss
+                    JOIN skills sk ON ss.skill_id = sk.skill_id
+                    WHERE ss.student_id = s.student_id
+                ) as skills_list
             FROM students s
             LEFT JOIN placements p ON s.student_id = p.student_id AND p.placement_status = 'PLACED'
             LEFT JOIN companies c ON p.company_id = c.company_id
@@ -238,7 +247,6 @@ def home():
         """)
         initial_students = cursor.fetchall()
 
-        # All departments for filter dropdown
         departments_list = [d["department"] for d in department_data]
 
         chart_data = {
@@ -283,7 +291,7 @@ def home():
 
 
 # =========================================================
-# FAST API - PAGINATED SEARCH & FILTER (1,200 Students)
+# FAST API - PAGINATED SEARCH & FILTER (1,200 Students with Skills)
 # =========================================================
 
 @app.route("/api/students")
@@ -325,7 +333,6 @@ def api_students():
 
         where_sql = " AND ".join(where_clauses)
 
-        # Sort mapping
         sort_map = {
             "id_asc": "s.student_id ASC",
             "id_desc": "s.student_id DESC",
@@ -349,7 +356,7 @@ def api_students():
         total_res = cursor.fetchone()
         total_records = total_res["total"] if total_res else 0
 
-        # Query paginated results
+        # Query paginated results with skills_list subquery
         data_query = f"""
             SELECT
                 s.student_id,
@@ -363,7 +370,13 @@ def api_students():
                 s.readiness_status,
                 CASE WHEN p.placement_id IS NOT NULL THEN 'PLACED' ELSE 'NOT PLACED' END as placement_status,
                 c.company_name,
-                c.package_lpa
+                c.package_lpa,
+                (
+                    SELECT GROUP_CONCAT(sk.skill_name, ', ')
+                    FROM student_skills ss
+                    JOIN skills sk ON ss.skill_id = sk.skill_id
+                    WHERE ss.student_id = s.student_id
+                ) as skills_list
             FROM students s
             LEFT JOIN placements p ON s.student_id = p.student_id AND p.placement_status = 'PLACED'
             LEFT JOIN companies c ON p.company_id = c.company_id
@@ -391,7 +404,7 @@ def api_students():
 
 
 # =========================================================
-# STUDENT DASHBOARD DATA
+# STUDENT DASHBOARD DATA HELPER
 # =========================================================
 
 def get_student_dashboard_data(student_id):
@@ -455,7 +468,6 @@ def get_student_dashboard_data(student_id):
 
         placement_status = "PLACED" if placements else "NOT PLACED"
 
-        # Benchmarks: Department avg and college avg
         cursor.execute("SELECT ROUND(AVG(cgpa), 2) as college_avg FROM students")
         col_avg_row = cursor.fetchone()
         college_avg_cgpa = col_avg_row["college_avg"] if col_avg_row else 8.19
@@ -468,7 +480,6 @@ def get_student_dashboard_data(student_id):
         dept_avg_row = cursor.fetchone()
         dept_avg_cgpa = dept_avg_row["dept_avg"] if dept_avg_row else 8.19
 
-        # Radar data for skills
         prof_val_map = {"Expert": 100, "Advanced": 80, "Intermediate": 55, "Beginner": 30}
         skill_names = [s["skill_name"] for s in skills]
         skill_scores = [prof_val_map.get(s["proficiency"], 40) for s in skills]
@@ -502,14 +513,124 @@ def get_student_dashboard_data(student_id):
 @app.route("/student/<int:student_id>")
 def student_dashboard(student_id):
     data = get_student_dashboard_data(student_id)
-
     if not data:
         abort(404)
+    return render_template("result.html", **data)
 
-    return render_template(
-        "result.html",
-        **data
-    )
+
+# =========================================================
+# PERFORMANCE COMPLETION CERTIFICATE ROUTE
+# =========================================================
+
+@app.route("/student/<int:student_id>/certificate")
+def student_certificate(student_id):
+    data = get_student_dashboard_data(student_id)
+    if not data:
+        abort(404)
+    return render_template("certificate.html", **data)
+
+
+# =========================================================
+# ADD NEW STUDENT (Admin Protected)
+# =========================================================
+
+@app.route("/student/add", methods=["GET", "POST"])
+def add_student():
+    if not admin_required():
+        return redirect(url_for("login"))
+
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    try:
+        cursor.execute("SELECT company_id, company_name, package_lpa FROM companies ORDER BY company_name")
+        companies = cursor.fetchall()
+
+        cursor.execute("SELECT skill_id, skill_name FROM skills ORDER BY skill_name")
+        all_skills = cursor.fetchall()
+
+        if request.method == "POST":
+            name = request.form.get("name", "").strip()
+            email = request.form.get("email", "").strip()
+            department = request.form.get("department", "").strip()
+            year = request.form.get("year", "4th Year").strip()
+            cgpa_str = request.form.get("cgpa", "8.0").strip()
+            gender = request.form.get("gender", "Male").strip()
+            placement_status = request.form.get("placement_status", "NOT PLACED").strip()
+            company_id_val = request.form.get("company_id", "").strip()
+            placement_date = request.form.get("placement_date", "").strip()
+
+            if not name or not email:
+                return render_template("add_student.html", companies=companies, all_skills=all_skills, error="Student Name and Email are mandatory.")
+
+            try:
+                cgpa = float(cgpa_str)
+            except ValueError:
+                return render_template("add_student.html", companies=companies, all_skills=all_skills, error="CGPA must be a valid number.")
+
+            is_placed = (placement_status.upper() == "PLACED")
+            selected_skill_ids = request.form.getlist("skill_ids")
+            prof_map = {"Beginner": 3, "Intermediate": 5, "Advanced": 8, "Expert": 10}
+            skill_points = 0
+
+            for sid_val in selected_skill_ids:
+                try:
+                    sid = int(sid_val)
+                    prof = request.form.get(f"proficiency_{sid}", "Intermediate").strip()
+                    skill_points += prof_map.get(prof, 5)
+                except ValueError:
+                    pass
+
+            cgpa_score = (cgpa / 10.0) * 40.0
+            norm_skill_score = min(40.0, (skill_points / 45.0) * 40.0)
+            status_score = 20.0 if is_placed else 10.0
+            readiness_score = round(min(100.0, cgpa_score + norm_skill_score + status_score), 1)
+
+            if readiness_score >= 85.0:
+                readiness_status = "Elite Ready"
+            elif readiness_score >= 72.0:
+                readiness_status = "Job Ready"
+            elif readiness_score >= 55.0:
+                readiness_status = "Developing"
+            else:
+                readiness_status = "Needs Upskilling"
+
+            cursor.execute("""
+                INSERT INTO students (name, email, department, year, cgpa, gender, readiness_score, readiness_status)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (name, email, department, year, cgpa, gender, readiness_score, readiness_status))
+
+            new_student_id = cursor.lastrowid
+
+            if is_placed and company_id_val:
+                try:
+                    comp_id = int(company_id_val)
+                    cursor.execute("""
+                        INSERT INTO placements (student_id, company_id, placement_status, placement_date)
+                        VALUES (%s, %s, %s, %s)
+                    """, (new_student_id, comp_id, "PLACED", placement_date or None))
+                except ValueError:
+                    pass
+
+            for sid_val in selected_skill_ids:
+                try:
+                    sid = int(sid_val)
+                    prof = request.form.get(f"proficiency_{sid}", "Intermediate").strip()
+                    cursor.execute("""
+                        INSERT INTO student_skills (student_id, skill_id, proficiency)
+                        VALUES (%s, %s, %s)
+                    """, (new_student_id, sid, prof))
+                except ValueError:
+                    pass
+
+            db.commit()
+            return redirect(url_for("student_dashboard", student_id=new_student_id))
+
+        return render_template("add_student.html", companies=companies, all_skills=all_skills)
+
+    finally:
+        cursor.close()
+        db.close()
 
 
 # =========================================================
@@ -525,7 +646,6 @@ def edit_student(student_id):
     cursor = db.cursor(dictionary=True)
 
     try:
-        # GET STUDENT
         cursor.execute("""
             SELECT
                 student_id,
@@ -545,7 +665,6 @@ def edit_student(student_id):
         if not student:
             abort(404)
 
-        # GET CURRENT PLACEMENT
         cursor.execute("""
             SELECT
                 p.placement_id,
@@ -563,7 +682,6 @@ def edit_student(student_id):
         """, (student_id,))
         placement = cursor.fetchone()
 
-        # GET ALL COMPANIES
         cursor.execute("""
             SELECT
                 company_id,
@@ -574,7 +692,6 @@ def edit_student(student_id):
         """)
         companies = cursor.fetchall()
 
-        # GET ALL AVAILABLE SKILLS
         cursor.execute("""
             SELECT
                 skill_id,
@@ -584,7 +701,6 @@ def edit_student(student_id):
         """)
         all_skills = cursor.fetchall()
 
-        # GET STUDENT'S CURRENT SKILLS
         cursor.execute("""
             SELECT
                 skill_id,
@@ -599,14 +715,13 @@ def edit_student(student_id):
             for skill in current_skills
         }
 
-        # POST - SAVE CHANGES
         if request.method == "POST":
             name = request.form.get("name", "").strip()
             email = request.form.get("email", "").strip() or None
             department = request.form.get("department", "").strip() or None
-            year_value = request.form.get("year", "").strip()
+            year_value = request.form.get("year", "4th Year").strip()
             cgpa_value = request.form.get("cgpa", "").strip()
-            gender = request.form.get("gender", "").strip() or None
+            gender = request.form.get("gender", "Male").strip() or None
 
             placement_status = request.form.get("placement_status", "NOT PLACED").strip()
             company_id_value = request.form.get("company_id", "").strip()
@@ -640,7 +755,6 @@ def edit_student(student_id):
                         error="CGPA must be a valid number."
                     )
 
-            # UPDATE PLACEMENT
             is_placed = (placement_status.upper() == "PLACED")
             if not is_placed:
                 cursor.execute("""
@@ -703,7 +817,6 @@ def edit_student(student_id):
                         placement_date if placement_date else None
                     ))
 
-            # UPDATE STUDENT SKILLS
             cursor.execute("""
                 DELETE FROM student_skills
                 WHERE student_id = %s
@@ -732,7 +845,6 @@ def edit_student(student_id):
                     VALUES (%s, %s, %s)
                 """, (student_id, skill_id, proficiency))
 
-            # Re-calculate readiness score
             cgpa_score = (cgpa / 10.0) * 40.0
             norm_skill_score = min(40.0, (skill_points / 45.0) * 40.0)
             status_score = 20.0 if is_placed else 10.0
@@ -747,7 +859,6 @@ def edit_student(student_id):
             else:
                 new_status = "Needs Upskilling"
 
-            # UPDATE STUDENT
             cursor.execute("""
                 UPDATE students
                 SET

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate of Performance Completion - {{ student.name }}</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #060a17;
+            color: #1a202c;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 15px;
+        }
+
+        .action-bar {
+            width: 100%;
+            max-width: 960px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid #00e5ff;
+            color: #00f7ff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: #00e5ff;
+            color: #060a17;
+        }
+
+        .print-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            background: linear-gradient(135deg, #00e5ff, #00ff9d);
+            border: none;
+            color: #060a17;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.4);
+            transition: transform 0.2s ease;
+        }
+
+        .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 229, 255, 0.6);
+        }
+
+        /* Certificate Container */
+        .certificate-sheet {
+            width: 100%;
+            max-width: 960px;
+            background: #ffffff;
+            color: #1a202c;
+            border: 14px solid #0a192f;
+            border-image: linear-gradient(135deg, #c5a059 0%, #ffd700 50%, #c5a059 100%) 14;
+            padding: 45px 50px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(197, 160, 89, 0.04) 0%, transparent 70%),
+                radial-gradient(circle at 10% 10%, rgba(0, 229, 255, 0.03) 0%, transparent 50%);
+        }
+
+        .cert-inner-border {
+            border: 2px solid #c5a059;
+            padding: 30px 40px;
+            position: relative;
+        }
+
+        .cert-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .inst-logo {
+            font-size: 26px;
+            letter-spacing: 2px;
+            color: #0a192f;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-family: Arial, sans-serif;
+        }
+
+        .inst-sub {
+            font-size: 13px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-top: 4px;
+            font-family: Arial, sans-serif;
+        }
+
+        .cert-title-area {
+            text-align: center;
+            margin: 25px 0 20px 0;
+        }
+
+        .cert-main-title {
+            font-size: 32px;
+            color: #0a192f;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-bottom: 2px solid #c5a059;
+            display: inline-block;
+            padding-bottom: 6px;
+        }
+
+        .cert-subtitle {
+            font-size: 15px;
+            color: #c5a059;
+            font-style: italic;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+
+        .cert-body {
+            text-align: center;
+            margin: 30px 0;
+            line-height: 1.8;
+            font-size: 16px;
+            color: #334155;
+        }
+
+        .student-name {
+            font-size: 36px;
+            color: #0a192f;
+            font-weight: 700;
+            font-family: 'Georgia', serif;
+            margin: 15px 0;
+            text-decoration: none;
+            border-bottom: 1px dashed #0a192f;
+            display: inline-block;
+            padding: 0 20px;
+        }
+
+        .cert-details-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 25px 0;
+            text-align: left;
+            font-family: Arial, sans-serif;
+        }
+
+        .cert-detail-item span {
+            display: block;
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .cert-detail-item strong {
+            font-size: 15px;
+            color: #0f172a;
+        }
+
+        .skills-summary-box {
+            background: rgba(197, 160, 89, 0.08);
+            border-left: 4px solid #c5a059;
+            padding: 12px 18px;
+            margin: 20px 0;
+            text-align: left;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            color: #334155;
+        }
+
+        .skills-summary-box strong {
+            color: #0a192f;
+        }
+
+        .cert-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 45px;
+            padding-top: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .cert-sig-block {
+            text-align: center;
+            width: 220px;
+        }
+
+        .sig-line {
+            border-top: 1px solid #64748b;
+            margin-bottom: 6px;
+        }
+
+        .sig-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .sig-title {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .gold-seal {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffe066, #c5a059);
+            border: 4px double #ffffff;
+            box-shadow: 0 0 15px rgba(197, 160, 89, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #0a192f;
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+
+        .cert-id-tag {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 11px;
+            color: #94a3b8;
+            font-family: Arial, sans-serif;
+            letter-spacing: 1px;
+        }
+
+        @media print {
+            body {
+                background: #ffffff;
+                padding: 0;
+            }
+            .action-bar {
+                display: none;
+            }
+            .certificate-sheet {
+                box-shadow: none;
+                margin: 0;
+                padding: 30px;
+                max-width: 100%;
+                border-width: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="action-bar">
+        <a href="/student/{{ student.student_id }}" class="back-btn">← Back to Student Profile</a>
+        <button class="print-btn" onclick="window.print()">🖨️ Print / Download Certificate (PDF)</button>
+    </div>
+
+    <div class="certificate-sheet">
+        <div class="cert-inner-border">
+            <div class="cert-header">
+                <div class="inst-logo">Placement &amp; Academic Intelligence System</div>
+                <div class="inst-sub">Autonomous Evaluation &amp; Career Readiness Board</div>
+            </div>
+
+            <div class="cert-title-area">
+                <h1 class="cert-main-title">Certificate of Performance Completion</h1>
+                <div class="cert-subtitle">This is officially presented to acknowledge distinguished completion of placement &amp; academic evaluation</div>
+            </div>
+
+            <div class="cert-body">
+                This is to certify that
+                <br>
+                <div class="student-name">{{ student.name }}</div>
+                <br>
+                Bearing Student ID <strong>#{{ student.student_id }}</strong> has successfully fulfilled all comprehensive academic performance evaluations, verified technical competency assessments, and campus placement milestones in the Department of
+                <br>
+                <strong style="color: #0a192f; font-size: 18px;">{{ student.department }}</strong>
+                ({{ student.year }}).
+            </div>
+
+            <div class="cert-details-grid">
+                <div class="cert-detail-item">
+                    <span>Academic Standing</span>
+                    <strong>CGPA: {{ student.cgpa }} / 10.00</strong>
+                </div>
+
+                <div class="cert-detail-item">
+                    <span>Placement Milestone</span>
+                    {% if placements %}
+                    <strong style="color: #059669;">PLACED • {{ placements[0].company_name }} ({{ placements[0].package_lpa }} LPA)</strong>
+                    {% else %}
+                    <strong style="color: #64748b;">In Campus Placement Preparation</strong>
+                    {% endif %}
+                </div>
+
+                <div class="cert-detail-item">
+                    <span>Career Readiness Rating</span>
+                    <strong>{{ student.readiness_status }} ({{ student.readiness_score }}%)</strong>
+                </div>
+            </div>
+
+            <div class="skills-summary-box">
+                <strong>Verified Technical Competencies:</strong>
+                {% for s in skills %}
+                {{ s.skill_name }} ({{ s.proficiency }}){% if not loop.last %} • {% endif %}
+                {% endfor %}
+            </div>
+
+            <div class="cert-footer">
+                <div class="cert-sig-block">
+                    <div class="sig-line"></div>
+                    <div class="sig-name">Dr. R. Ramanathan, Ph.D.</div>
+                    <div class="sig-title">Dean of Academic Affairs</div>
+                </div>
+
+                <div class="gold-seal">
+                    <span>OFFICIAL</span>
+                    <span>VERIFIED</span>
+                    <span>2026</span>
+                </div>
+
+                <div class="cert-sig-block">
+                    <div class="sig-line"></div>
+                    <div class="sig-name">Prof. Lithik Raj B G</div>
+                    <div class="sig-title">Head of Placement Analytics</div>
+                </div>
+            </div>
+
+            <div class="cert-id-tag">
+                VERIFICATION ID: SPAS-2026-STU-{{ "%04d" | format(student.student_id) }} • ISSUED VIA CAMPUS PLACEMENT ANALYTICS SYSTEM
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

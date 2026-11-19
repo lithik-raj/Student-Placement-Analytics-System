@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add New Student Profile | Placement Analytics System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <style>
+      body {
+        min-height: 100vh;
+        background: #050816;
+        color: #ffffff;
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        padding: 40px 20px;
+      }
+
+      .add-container {
+        width: 100%;
+        max-width: 820px;
+        margin: auto;
+      }
+
+      .add-card {
+        background: rgba(13, 23, 48, 0.96);
+        border: 1px solid rgba(0, 229, 255, 0.35);
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 229, 255, 0.1);
+      }
+
+      .add-header {
+        text-align: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(0, 229, 255, 0.15);
+      }
+
+      .add-header h1 {
+        color: #00f7ff;
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+
+      .add-header p {
+        color: #a8b3c7;
+        font-size: 13px;
+      }
+
+      .form-section-title {
+        color: #00e5ff;
+        font-size: 16px;
+        font-weight: 700;
+        margin-top: 25px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .form-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      label {
+        display: block;
+        color: #dce7ff;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+
+      input[type="text"],
+      input[type="email"],
+      input[type="number"],
+      input[type="date"],
+      select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 11px 14px;
+        border: 1px solid rgba(0, 229, 255, 0.25);
+        border-radius: 10px;
+        background: rgba(5, 8, 22, 0.85);
+        color: #ffffff;
+        font-size: 14px;
+        outline: none;
+        transition: all 0.2s ease;
+      }
+
+      input:focus, select:focus {
+        border-color: #00e5ff;
+        box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+      }
+
+      select option {
+        background: #0a1228;
+        color: #fff;
+      }
+
+      .skill-selection-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .skill-item-row {
+        background: rgba(5, 12, 30, 0.7);
+        border: 1px solid rgba(0, 229, 255, 0.15);
+        border-radius: 10px;
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .skill-left-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+      }
+
+      .skill-left-label input[type="checkbox"] {
+        accent-color: #00e5ff;
+        width: 17px;
+        height: 17px;
+      }
+
+      .skill-prof-select {
+        width: 130px;
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+
+      .form-actions-bar {
+        display: flex;
+        gap: 14px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(0, 229, 255, 0.15);
+      }
+
+      .btn-save {
+        flex: 1;
+        padding: 13px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, rgba(0, 229, 255, 0.35), rgba(0, 255, 157, 0.35));
+        border: 1px solid #00e5ff;
+        color: #ffffff;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s ease;
+      }
+
+      .btn-save:hover {
+        background: #00e5ff;
+        color: #050816;
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+      }
+
+      .btn-cancel {
+        padding: 13px 24px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #a8b3c7;
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+        text-align: center;
+      }
+
+      .btn-cancel:hover {
+        color: #fff;
+        border-color: #fff;
+      }
+
+      .error-alert {
+        padding: 12px;
+        margin-bottom: 20px;
+        border-radius: 10px;
+        background: rgba(255, 77, 109, 0.15);
+        border: 1px solid rgba(255, 77, 109, 0.35);
+        color: #ff6b81;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      @media (max-width: 650px) {
+        .form-grid-2, .skill-selection-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="add-container">
+      <div class="add-card">
+        <div class="add-header">
+          <h1>Add New Student Profile</h1>
+          <p>Register a new student into the Placement Analytics Cohort (with verified skills &amp; placement record)</p>
+        </div>
+
+        {% if error %}
+        <div class="error-alert">⚠️ {{ error }}</div>
+        {% endif %}
+
+        <form method="POST">
+          <!-- 1. ACADEMIC & BASIC INFORMATION -->
+          <div class="form-section-title">👤 Academic &amp; Personal Information</div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="name">Full Name</label>
+              <input type="text" id="name" name="name" placeholder="e.g. Vignesh Sundaram" required />
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" name="email" placeholder="vignesh.s@example.com" required />
+            </div>
+
+            <div class="form-group">
+              <label for="department">Department</label>
+              <select id="department" name="department" required>
+                <option value="Artificial Intelligence & Data Science">Artificial Intelligence &amp; Data Science</option>
+                <option value="Computer Science & Engineering">Computer Science &amp; Engineering</option>
+                <option value="Information Technology">Information Technology</option>
+                <option value="Electronics & Communication Engineering">Electronics &amp; Communication</option>
+                <option value="Electrical & Electronics Engineering">Electrical &amp; Electronics</option>
+                <option value="Mechanical Engineering">Mechanical Engineering</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="year">Academic Batch / Year</label>
+              <select id="year" name="year">
+                <option value="4th Year">4th Year (Graduating Batch)</option>
+                <option value="3rd Year">3rd Year (Pre-Final Year)</option>
+                <option value="2nd Year">2nd Year</option>
+                <option value="1st Year">1st Year</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="cgpa">Cumulative CGPA (0.0 - 10.0)</label>
+              <input type="number" id="cgpa" name="cgpa" placeholder="e.g. 8.65" min="0" max="10" step="0.01" required />
+            </div>
+
+            <div class="form-group">
+              <label for="gender">Gender</label>
+              <select id="gender" name="gender">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 2. PLACEMENT INFORMATION -->
+          <div class="form-section-title">💼 Campus Recruitment Status</div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label for="placement_status">Placement Status</label>
+              <select id="placement_status" name="placement_status" onchange="toggleCompany(this.value)">
+                <option value="NOT PLACED">NOT PLACED (In Campus Preparation)</option>
+                <option value="PLACED">PLACED (Offer Received)</option>
+              </select>
+            </div>
+
+            <div class="form-group" id="companyGroup" style="opacity: 0.4;">
+              <label for="company_id">Recruiting Partner</label>
+              <select id="company_id" name="company_id">
+                <option value="">-- Select Company --</option>
+                {% for comp in companies %}
+                <option value="{{ comp.company_id }}">{{ comp.company_name }} ({{ comp.package_lpa }} LPA)</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="form-group" id="dateGroup" style="opacity: 0.4;">
+              <label for="placement_date">Offer Date</label>
+              <input type="date" id="placement_date" name="placement_date" />
+            </div>
+          </div>
+
+          <!-- 3. TECHNICAL SKILLS & PROFICIENCY -->
+          <div class="form-section-title">⚡ Technical Skills Inventory &amp; Proficiencies</div>
+          <p style="font-size: 12px; color: #a8b3c7; margin-bottom: 14px;">Select the verified technical skills to associate with this student profile:</p>
+
+          <div class="skill-selection-grid">
+            {% for sk in all_skills %}
+            <div class="skill-item-row">
+              <label class="skill-left-label">
+                <input type="checkbox" name="skill_ids" value="{{ sk.skill_id }}" />
+                <span>{{ sk.skill_name }}</span>
+              </label>
+
+              <select name="proficiency_{{ sk.skill_id }}" class="skill-prof-select">
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate" selected>Intermediate</option>
+                <option value="Advanced">Advanced</option>
+                <option value="Expert">Expert</option>
+              </select>
+            </div>
+            {% endfor %}
+          </div>
+
+          <!-- ACTIONS -->
+          <div class="form-actions-bar">
+            <button type="submit" class="btn-save">➕ Create Student Profile &amp; Generate Certificate</button>
+            <a href="/" class="btn-cancel">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      function toggleCompany(status) {
+        const compGroup = document.getElementById("companyGroup");
+        const dateGroup = document.getElementById("dateGroup");
+        if (status === "NOT PLACED") {
+          compGroup.style.opacity = "0.4";
+          dateGroup.style.opacity = "0.4";
+        } else {
+          compGroup.style.opacity = "1";
+          dateGroup.style.opacity = "1";
+        }
+      }
+    </script>
+  </body>
+</html>

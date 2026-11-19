@@ -1,13 +1,10 @@
 // =========================================================
 // PLACEMENT ANALYTICS SYSTEM - ENTERPRISE DASHBOARD SCRIPT
-// Managing 1,200 Student Profiles with Chart.js & Instant Search
+// Managing 1,200 Student Profiles with Chart.js, Skills & Instant Pagination
 // =========================================================
 
 document.addEventListener("DOMContentLoaded", function () {
-  // 1. Initialize Chart.js Dashboard Charts
   initDashboardCharts();
-
-  // 2. Initialize 1,200 Student Paginated Directory & Filters
   initStudentDirectory();
 });
 
@@ -27,7 +24,6 @@ function initDashboardCharts() {
     return;
   }
 
-  // Set global Chart.js defaults for dark cyberpunk theme
   Chart.defaults.color = "#a8b3c7";
   Chart.defaults.font.family = "Inter, 'Segoe UI', Arial, sans-serif";
   Chart.defaults.plugins.tooltip.backgroundColor = "rgba(10, 16, 32, 0.95)";
@@ -41,7 +37,6 @@ function initDashboardCharts() {
   // Chart 1: Department Placement Performance (Grouped Bar Chart)
   const ctxDept = document.getElementById("deptChart");
   if (ctxDept) {
-    // Shorten department labels for clean mobile layout
     const shortLabels = (data.dept_labels || []).map(d => {
       if (d.includes("Artificial Intelligence")) return "AI & DS";
       if (d.includes("Computer Science")) return "CSE";
@@ -117,7 +112,7 @@ function initDashboardCharts() {
     });
   }
 
-  // Chart 3: Salary Package Tiers (Polar/Bar Chart)
+  // Chart 3: Salary Package Tiers (Bar Chart)
   const ctxTier = document.getElementById("salaryTierChart");
   if (ctxTier) {
     new Chart(ctxTier, {
@@ -255,7 +250,7 @@ function initDashboardCharts() {
 }
 
 // =========================================================
-// 2. 1,200 STUDENT PROFILES DIRECTORY (FAST FILTER & PAGINATION)
+// 2. 1,200 STUDENT PROFILES DIRECTORY (SKILLS & PAGINATION ENGINE)
 // =========================================================
 
 function initStudentDirectory() {
@@ -268,6 +263,7 @@ function initStudentDirectory() {
   const resultsCount = document.getElementById("resultsCount");
   const totalCount = document.getElementById("totalCount");
   const pageSummary = document.getElementById("pageSummary");
+  const pageNumbersArea = document.getElementById("pageNumbersArea");
 
   const firstBtn = document.getElementById("firstPageBtn");
   const prevBtn = document.getElementById("prevPageBtn");
@@ -282,7 +278,7 @@ function initStudentDirectory() {
   let searchTimeout = null;
 
   async function fetchStudents(page = 1) {
-    currentPage = page;
+    currentPage = parseInt(page) || 1;
 
     const queryParams = new URLSearchParams({
       page: currentPage,
@@ -295,7 +291,6 @@ function initStudentDirectory() {
     });
 
     try {
-      // Optional subtle opacity transition
       gridContainer.style.opacity = "0.5";
 
       const res = await fetch(`/api/students?${queryParams.toString()}`);
@@ -318,6 +313,9 @@ function initStudentDirectory() {
       if (nextBtn) nextBtn.disabled = (currentPage >= totalPages);
       if (lastBtn) lastBtn.disabled = (currentPage >= totalPages);
 
+      // Render numeric page buttons
+      renderPageNumbers(currentPage, totalPages);
+
     } catch (err) {
       console.error("Error loading students:", err);
     } finally {
@@ -325,12 +323,53 @@ function initStudentDirectory() {
     }
   }
 
+  function renderPageNumbers(curr, total) {
+    if (!pageNumbersArea) return;
+    let html = "";
+
+    const maxVisible = 5;
+    let start = Math.max(1, curr - Math.floor(maxVisible / 2));
+    let end = Math.min(total, start + maxVisible - 1);
+
+    if (end - start + 1 < maxVisible) {
+      start = Math.max(1, end - maxVisible + 1);
+    }
+
+    if (start > 1) {
+      html += `<button type="button" class="page-pill" data-page="1">1</button>`;
+      if (start > 2) html += `<span class="page-ellipsis">...</span>`;
+    }
+
+    for (let p = start; p <= end; p++) {
+      const activeClass = (p === curr) ? "active" : "";
+      html += `<button type="button" class="page-pill ${activeClass}" data-page="${p}">${p}</button>`;
+    }
+
+    if (end < total) {
+      if (end < total - 1) html += `<span class="page-ellipsis">...</span>`;
+      html += `<button type="button" class="page-pill" data-page="${total}">${total}</button>`;
+    }
+
+    pageNumbersArea.innerHTML = html;
+
+    // Attach click listeners to numeric pills
+    pageNumbersArea.querySelectorAll(".page-pill").forEach(pill => {
+      pill.addEventListener("click", function () {
+        const p = parseInt(this.getAttribute("data-page"));
+        if (p && p !== currentPage) {
+          fetchStudents(p);
+          scrollToDirectory();
+        }
+      });
+    });
+  }
+
   function renderStudents(students) {
     if (!students || students.length === 0) {
       gridContainer.innerHTML = `
         <div class="empty-state" style="grid-column: 1 / -1; padding: 40px; text-align: center;">
-          <h3 style="color: var(--cyan); margin-bottom: 8px;">No Students Found</h3>
-          <p style="color: var(--text-muted);">Try adjusting your search criteria or resetting filters.</p>
+          <h3 style="color: var(--cyan); margin-bottom: 8px;">No Students Match Criteria</h3>
+          <p style="color: var(--text-muted);">Try adjusting your search terms or clearing filters.</p>
         </div>
       `;
       return;
@@ -343,14 +382,37 @@ function initStudentDirectory() {
 
       const statusBadge = isPlaced
         ? `<span class="badge-status-placed">✓ ${escapeHtml(s.company_name || "Placed")} (${s.package_lpa || ""} LPA)</span>`
-        : `<span class="badge-status-unplaced">Not Placed</span>`;
+        : `<span class="badge-status-unplaced">In Preparation</span>`;
+
+      // Eligibility tag based on CGPA
+      let eligibilityTag = "";
+      if (s.cgpa >= 8.5) {
+        eligibilityTag = `<span class="badge-eligibility-super">🏆 Super Dream Eligible (&gt;20 LPA)</span>`;
+      } else if (s.cgpa >= 7.5) {
+        eligibilityTag = `<span class="badge-eligibility-dream">💼 Dream Eligible (10-20 LPA)</span>`;
+      } else {
+        eligibilityTag = `<span class="badge-eligibility-core">⚡ Core &amp; IT Eligible (6-10 LPA)</span>`;
+      }
+
+      // Skills List Tags
+      let skillsHtml = "";
+      if (s.skills_list) {
+        const skillsArr = s.skills_list.split(", ");
+        const shownSkills = skillsArr.slice(0, 4);
+        skillsHtml = shownSkills.map(sk => `<span class="card-skill-tag">${escapeHtml(sk)}</span>`).join("");
+        if (skillsArr.length > 4) {
+          skillsHtml += `<span class="card-skill-tag" style="color: var(--cyan);">+${skillsArr.length - 4} more</span>`;
+        }
+      }
 
       return `
-        <a href="/student/${s.student_id}" class="student-card-enhanced">
+        <div class="student-card-enhanced">
           <div class="student-card-top">
             <div class="student-avatar">${initial}</div>
             <div class="student-meta">
-              <div class="student-name-text">${escapeHtml(s.name)}</div>
+              <a href="/student/${s.student_id}" style="text-decoration: none; color: inherit;">
+                <div class="student-name-text">${escapeHtml(s.name)}</div>
+              </a>
               <div class="student-id-text">ID: #${s.student_id} • ${escapeHtml(s.year || "4th Year")}</div>
             </div>
           </div>
@@ -361,16 +423,29 @@ function initStudentDirectory() {
             ${statusBadge}
           </div>
 
+          <div style="margin: 4px 0;">
+            ${eligibilityTag}
+          </div>
+
+          <div class="card-skills-row">
+            ${skillsHtml}
+          </div>
+
           <div class="student-readiness-meter">
             <div class="readiness-meter-labels">
-              <span>${escapeHtml(s.readiness_status || "Developing")}</span>
+              <span>Readiness: <strong>${escapeHtml(s.readiness_status || "Developing")}</strong></span>
               <span><strong>${s.readiness_score || 0}%</strong></span>
             </div>
             <div class="readiness-track">
               <div class="readiness-fill" style="width: ${s.readiness_score || 0}%;"></div>
             </div>
           </div>
-        </a>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06);">
+            <a href="/student/${s.student_id}" style="color: var(--cyan); font-size: 12px; font-weight: 600; text-decoration: none;">View Profile &amp; Radar →</a>
+            <a href="/student/${s.student_id}/certificate" class="card-cert-quick-link">📜 Certificate</a>
+          </div>
+        </div>
       `;
     }).join("");
 
@@ -385,6 +460,13 @@ function initStudentDirectory() {
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+  }
+
+  function scrollToDirectory() {
+    const sec = document.getElementById("studentsDirectorySection");
+    if (sec) {
+      sec.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   }
 
   // Event Listeners with Debounce for Search
@@ -403,9 +485,43 @@ function initStudentDirectory() {
     }
   });
 
-  // Pagination click handlers
-  if (firstBtn) firstBtn.addEventListener("click", () => { if (currentPage > 1) fetchStudents(1); });
-  if (prevBtn) prevBtn.addEventListener("click", () => { if (currentPage > 1) fetchStudents(currentPage - 1); });
-  if (nextBtn) nextBtn.addEventListener("click", () => { if (currentPage < totalPages) fetchStudents(currentPage + 1); });
-  if (lastBtn) lastBtn.addEventListener("click", () => { if (currentPage < totalPages) fetchStudents(totalPages); });
+  // Pagination navigation click handlers
+  if (firstBtn) {
+    firstBtn.addEventListener("click", () => {
+      if (currentPage > 1) {
+        fetchStudents(1);
+        scrollToDirectory();
+      }
+    });
+  }
+
+  if (prevBtn) {
+    prevBtn.addEventListener("click", () => {
+      if (currentPage > 1) {
+        fetchStudents(currentPage - 1);
+        scrollToDirectory();
+      }
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      if (currentPage < totalPages) {
+        fetchStudents(currentPage + 1);
+        scrollToDirectory();
+      }
+    });
+  }
+
+  if (lastBtn) {
+    lastBtn.addEventListener("click", () => {
+      if (currentPage < totalPages) {
+        fetchStudents(totalPages);
+        scrollToDirectory();
+      }
+    });
+  }
+
+  // Initial render of page numbers for the initial 24 students
+  renderPageNumbers(1, totalPages);
 }
